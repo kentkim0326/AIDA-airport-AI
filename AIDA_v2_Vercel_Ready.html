@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIDA v2 — AI Delay Assistant</title>
+<style>
+:root {
+  --navy:#0A1628; --blue:#1565C0; --sky:#1E88E5; --cyan:#00B4D8;
+  --white:#FFFFFF; --off:#F0F4F8; --gray:#64748B; --light:#E2E8F0;
+  --gold:#F59E0B; --green:#10B981; --red:#EF4444; --purple:#7C3AED;
+  --dark2:#0D2137;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+     background:var(--off);color:var(--navy);min-height:100vh;}
+
+/* ── Header ── */
+.header{background:var(--navy);padding:14px 24px;display:flex;align-items:center;
+        gap:14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.logo{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;}
+.logo span{color:var(--cyan);}
+.logo-sub{font-size:11px;color:#7090B0;margin-top:1px;}
+.hbadge{margin-left:auto;background:var(--blue);color:#fff;font-size:11px;
+        padding:5px 12px;border-radius:20px;white-space:nowrap;}
+.ver{background:#1D3A5A;color:var(--cyan);font-size:10px;padding:3px 8px;
+     border-radius:10px;margin-left:8px;}
+
+/* ── Tabs ── */
+.main-tabs{display:flex;gap:0;background:#fff;border-bottom:2px solid var(--light);
+           position:sticky;top:56px;z-index:100;}
+.mtab{padding:13px 22px;font-size:13px;font-weight:600;color:var(--gray);
+      cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;
+      transition:all .2s;white-space:nowrap;}
+.mtab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.mtab:hover{color:var(--blue);}
+
+/* ── Panels ── */
+.panel{display:none;padding:20px 16px;max-width:1200px;margin:0 auto;}
+.panel.active{display:block;}
+
+/* ── Grid ── */
+.grid2{display:grid;grid-template-columns:340px 1fr;gap:18px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:800px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}}
+
+/* ── Card ── */
+.card{background:#fff;border-radius:14px;padding:18px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px;}
+.ctitle{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;
+        letter-spacing:1px;margin-bottom:14px;}
+
+/* ── Form ── */
+.ig{margin-bottom:12px;}
+label{display:block;font-size:11px;font-weight:600;color:var(--gray);margin-bottom:4px;}
+select,input[type=text],input[type=number]{
+  width:100%;padding:9px 11px;border:1.5px solid var(--light);border-radius:8px;
+  font-size:13px;background:var(--off);transition:border-color .2s;outline:none;}
+select:focus,input:focus{border-color:var(--blue);background:#fff;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ── API Key input ── */
+.apikey-bar{background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;
+            padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.apikey-bar input{flex:1;border:1px solid #93C5FD;border-radius:7px;padding:7px 10px;
+                  font-size:12px;background:#fff;}
+.apikey-bar .tip{font-size:11px;color:#1E40AF;white-space:nowrap;}
+.key-status{width:8px;height:8px;border-radius:50%;background:var(--gray);flex-shrink:0;}
+.key-status.ok{background:var(--green);}
+
+/* ── Buttons ── */
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;
+     font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:var(--sky);transform:translateY(-1px);}
+.btn-primary:disabled{background:var(--gray);transform:none;cursor:not-allowed;}
+.btn-sm{width:auto;padding:7px 14px;font-size:12px;border-radius:8px;}
+
+/* ── Status ── */
+.sbar{display:flex;align-items:center;gap:10px;padding:11px 14px;
+      border-radius:10px;margin-bottom:14px;}
+.sbar.normal{background:#D1FAE5;border-left:4px solid var(--green);}
+.sbar.delay {background:#FEF3C7;border-left:4px solid var(--gold);}
+.sbar.severe{background:#FEE2E2;border-left:4px solid var(--red);}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sbar.normal .sdot{background:var(--green);}
+.sbar.delay  .sdot{background:var(--gold);}
+.sbar.severe .sdot{background:var(--red);}
+
+/* ── Steps ── */
+.steps{display:flex;margin-bottom:16px;}
+.step{flex:1;text-align:center;padding:9px 3px;font-size:10px;color:var(--gray);
+      border-bottom:3px solid var(--light);}
+.step.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700;}
+.step.done  {color:var(--green);border-bottom-color:var(--green);}
+.step-n{display:block;font-size:15px;margin-bottom:2px;}
+
+/* ── Info grid ── */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.iitem{background:var(--off);border-radius:10px;padding:11px 13px;}
+.ilabel{font-size:10px;color:var(--gray);font-weight:600;margin-bottom:3px;}
+.ival{font-size:19px;font-weight:800;}
+.ival.g{color:var(--green);} .ival.o{color:var(--gold);} .ival.r{color:var(--red);}
+.isub{font-size:10px;color:var(--gray);margin-top:1px;}
+
+/* ── Services ── */
+.svc{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;
+     border-radius:9px;background:var(--off);border:1px solid var(--light);margin-bottom:7px;}
+.svc.on{background:#EFF6FF;border-color:#93C5FD;}
+.svc-ico{font-size:18px;flex-shrink:0;}
+.svc-t{font-size:12px;font-weight:700;margin-bottom:1px;}
+.svc-d{font-size:11px;color:var(--gray);}
+.sbadge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 8px;
+        border-radius:20px;flex-shrink:0;white-space:nowrap;}
+.bd{background:#D1FAE5;color:#065F46;} .bw{background:#FEF3C7;color:#92400E;}
+.bn{background:var(--light);color:var(--gray);}
+
+/* ── Message box ── */
+.lang-tabs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.ltab{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;
+      cursor:pointer;border:1.5px solid var(--light);background:#fff;transition:all .15s;}
+.ltab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.msgbox{background:var(--off);border-radius:10px;padding:14px;font-size:12px;
+        line-height:1.8;white-space:pre-wrap;min-height:160px;
+        border:1px solid var(--light);font-family:monospace;}
+.ai-tag{display:inline-block;background:#F3E8FF;color:#6D28D9;font-size:10px;
+        font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+
+/* ── Baggage Map ── */
+#bagMap{width:100%;height:420px;background:var(--navy);border-radius:14px;
+        position:relative;overflow:hidden;}
+.map-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;}
+.leg-item{display:flex;align-items:center;gap:5px;color:var(--gray);}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+
+/* Map terminal zones */
+.zone{position:absolute;border-radius:10px;display:flex;align-items:center;
+      justify-content:center;font-size:10px;font-weight:700;}
+
+/* ── Baggage card ── */
+.bag-card{background:var(--dark2);border-radius:10px;padding:12px 14px;
+          margin-bottom:8px;display:flex;align-items:center;gap:12px;
+          border-left:4px solid var(--cyan);}
+.bag-card.moving{border-left-color:var(--gold);}
+.bag-card.stored {border-left-color:var(--purple);}
+.bag-card.ready  {border-left-color:var(--green);}
+.bag-num{font-size:13px;font-weight:700;color:#fff;}
+.bag-info{font-size:11px;color:#7090B0;}
+.bag-status{margin-left:auto;font-size:11px;font-weight:700;padding:4px 10px;
+            border-radius:20px;white-space:nowrap;}
+.bs-move{background:rgba(245,158,11,.15);color:var(--gold);}
+.bs-store{background:rgba(124,58,237,.15);color:#A78BFA;}
+.bs-ready{background:rgba(16,185,129,.15);color:var(--green);}
+
+/* ── Risk bar ── */
+.rbar{height:7px;background:var(--light);border-radius:4px;overflow:hidden;margin:5px 0 2px;}
+.rfill{height:100%;border-radius:4px;transition:width .8s ease;}
+
+/* ── Insight ── */
+.insight{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;
+         padding:12px 14px;font-size:12px;color:var(--blue);line-height:1.6;margin-top:10px;}
+
+/* ── Spinner / typing ── */
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+         border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+.typing::after{content:'▌';animation:blink .7s infinite;}
+
+/* ── Baggage dot animations ── */
+@keyframes moveDot{0%{left:var(--sx);top:var(--sy);}100%{left:var(--ex);top:var(--ey);}}
+@keyframes pulseDot{0%,100%{transform:scale(1);}50%{transform:scale(1.4);}}
+.bag-dot{position:absolute;width:14px;height:14px;border-radius:50%;
+         transform:translate(-50%,-50%);cursor:pointer;transition:left 2s ease,top 2s ease;}
+.bag-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;
+               border:2px solid currentColor;opacity:.4;animation:pulseDot 1.5s infinite;}
+.bag-dot-label{position:absolute;font-size:9px;font-weight:700;white-space:nowrap;
+               transform:translate(-50%,10px);pointer-events:none;}
+
+footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-top:8px;}
+</style>
+</head>
+<div class="panel" id="panel-live">
+  <div style="max-width:960px;margin:0 auto;">
+
+    <!-- API Key 안내 -->
+    <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:12px;color:#1E40AF;line-height:1.7">
+      📡 <b>한국 공공데이터포털 실시간 연동</b> — 인천국제공항공사 공식 Open API 사용<br>
+      아래 데이터는 공공데이터포털(data.go.kr) API 키 발급 후 실시간 연동됩니다.
+      데모 모드에서는 <b>실제와 유사한 샘플 데이터</b>로 작동합니다.<br>
+      <span style="color:#10B981;font-weight:700">✅ 사용 API: 인천공항 여객기 운항현황 | 출국장 혼잡도 | 시간대별 승객예고</span>
+    </div>
+
+    <!-- 공공데이터 API 키 입력 -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="ctitle">🔑 공공데이터 API 키 설정</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="password" id="publicApiKey" placeholder="공공데이터포털 API 키 입력 (data.go.kr에서 발급)"
+          style="flex:1;padding:9px 12px;border:1.5px solid #BFDBFE;border-radius:8px;font-size:12px"
+          oninput="checkPublicKey(this.value)">
+        <button onclick="fetchLiveData()" class="btn btn-primary btn-sm" style="white-space:nowrap">
+          🔄 실시간 데이터 불러오기
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--gray);margin-top:6px">
+        키 없이도 샘플 데이터로 UI 확인 가능 | 발급처: <a href="https://www.data.go.kr" target="_blank" style="color:var(--blue)">data.go.kr</a>
+        → 인천국제공항공사_여객기 운항현황 상세 조회 서비스 신청
+      </div>
+    </div>
+
+    <!-- 실시간 현황 대시보드 -->
+    <div class="grid3" style="margin-bottom:16px">
+      <div class="card" style="text-align:center">
+        <div class="ilabel">현재 출국장 혼잡도 (T2)</div>
+        <div class="ival" id="liveCongest" style="font-size:28px;color:var(--gold)">로딩 중...</div>
+        <div class="isub" id="liveCongestSub">data.go.kr 출국장 혼잡도 API</div>
+        <div style="margin-top:8px">
+          <div style="background:var(--light);border-radius:20px;height:8px;overflow:hidden">
+            <div id="congestBar" style="height:100%;border-radius:20px;background:var(--gold);width:0%;transition:width 1s"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="ilabel">오늘 총 출발편 수</div>
+        <div class="ival" id="liveDepartures" style="font-size:28px;color:var(--blue)">로딩 중...</div>
+        <div class="isub">인천공항 여객기 운항현황 API</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="ilabel">현재 지연 발생 편수</div>
+        <div class="ival" id="liveDelayed" style="font-size:28px;color:var(--red)">로딩 중...</div>
+        <div class="isub" id="liveDelayRate">지연율 계산 중...</div>
+      </div>
+    </div>
+
+    <!-- 실시간 항공편 테이블 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="ctitle" style="margin-bottom:0">🛫 실시간 출발 항공편 현황 (인천공항)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="liveAirlineFilter" onchange="filterFlights()" style="font-size:11px;padding:5px 8px;border-radius:7px;border:1px solid var(--light)">
+            <option value="">전체 항공사</option>
+            <option value="KE">대한항공 (KE)</option>
+            <option value="OZ">아시아나 (OZ)</option>
+            <option value="7C">제주항공 (7C)</option>
+            <option value="LJ">진에어 (LJ)</option>
+          </select>
+          <span id="liveUpdateTime" style="font-size:10px;color:var(--gray)">마지막 업데이트: -</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px" id="flightTable">
+          <thead>
+            <tr style="background:var(--navy);color:#fff">
+              <th style="padding:9px 12px;text-align:left;border-radius:8px 0 0 0">편명</th>
+              <th style="padding:9px 12px;text-align:left">항공사</th>
+              <th style="padding:9px 12px;text-align:left">목적지</th>
+              <th style="padding:9px 12px;text-align:center">예정출발</th>
+              <th style="padding:9px 12px;text-align:center">변경시간</th>
+              <th style="padding:9px 12px;text-align:center">탑승구</th>
+              <th style="padding:9px 12px;text-align:center;border-radius:0 8px 0 0">상태</th>
+            </tr>
+          </thead>
+          <tbody id="flightTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray)">
+              '실시간 데이터 불러오기' 버튼을 누르거나 아래 샘플 데이터 보기를 클릭하세요
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 샘플 데이터 버튼 -->
+    <div style="text-align:center;margin-top:12px">
+      <button onclick="loadSampleFlights()" class="btn btn-primary btn-sm" style="margin-right:8px">
+        📋 샘플 데이터로 미리보기 (API 키 불필요)
+      </button>
+      <span style="font-size:11px;color:var(--gray)">실제 공공데이터 연동 시 실시간으로 자동 업데이트됩니다</span>
+    </div>
+
+    <!-- AIDA 연동 설명 -->
+    <div class="card" style="margin-top:16px;background:linear-gradient(135deg,#0A1628,#1565C0);color:#fff">
+      <div class="ctitle" style="color:#90CAF9">🤖 AIDA × 공공데이터 연동 방식</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+          <div style="font-size:18px;margin-bottom:6px">1️⃣</div>
+          <div style="font-weight:700;margin-bottom:4px;color:#90CAF9">실시간 지연 탐지</div>
+          <div style="color:#B0C4DE">공공데이터 API로 지연 발생 즉시 감지 → 해당 항공편 승객 자동 매핑</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+          <div style="font-size:18px;margin-bottom:6px">2️⃣</div>
+          <div style="font-weight:700;margin-bottom:4px;color:#90CAF9">RAG 기반 맞춤 안내</div>
+          <div style="color:#B0C4DE">지연 원인·시간·승객 특이사항을 LLM에 주입 → 개인화 메시지 자동 생성</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+          <div style="font-size:18px;margin-bottom:6px">3️⃣</div>
+          <div style="font-weight:700;margin-bottom:4px;color:#90CAF9">10개국어 즉시 발송</div>
+          <div style="color:#B0C4DE">승객 국적 기반 언어 자동 선택 → SMS/앱 푸시 동시 발송</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:#7090B0">
+        활용 공공데이터: 인천국제공항공사 여객기 운항현황(data.go.kr/15112968) | 출국장 혼잡도(data.go.kr/15148225) | 승객예고(data.go.kr/15095066)
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  AIDA v2 — AI Delay Assistant | 인천공항 AI-PORT 공모전 출품작 | 화이팅 네이션<br>
+  ♪ 베르디의 오페라 <em>Aida</em>에서 영감 — 혼란 속 승객 곁의 목소리<br>
+  공공데이터 출처: 공공데이터포털(data.go.kr) | 인천국제공항공사
+</footer>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">AI<span>DA</span> <span class="ver">v2</span></div>
+    <div class="logo-sub">AI Delay Assistant — Claude API + 실시간 수하물 맵</div>
+  </div>
+  <div class="hbadge">🏆 인천공항 AI-PORT 공모전</div>
+</div>
+
+<!-- Main Tabs -->
+<div class="main-tabs">
+  <div class="mtab active" onclick="showPanel('sim',this)">✈ 지연 시뮬레이터</div>
+  <div class="mtab" onclick="showPanel('map',this)">📦 수하물 실시간 맵</div>
+  <div class="mtab" onclick="showPanel('ai',this)">🤖 AI 메시지 생성</div>
+  <div class="mtab" onclick="showPanel('live',this)">📡 실시간 공항 현황</div>
+</div>
+
+<!-- ══════════════ PANEL 1: 시뮬레이터 ══════════════ -->
+<div class="panel active" id="panel-sim">
+  <div class="grid2">
+
+    <!-- LEFT -->
+    <div>
+      <div class="card">
+        <div class="ctitle">✈ 지연 시뮬레이터</div>
+        <div class="row2">
+          <div class="ig"><label>항공편 번호</label>
+            <input type="text" id="flightNo" value="KE823"></div>
+          <div class="ig"><label>항공사</label>
+            <select id="airline">
+              <option value="KE">대한항공 (KE)</option>
+              <option value="OZ">아시아나 (OZ)</option>
+              <option value="7C" selected>제주항공 (7C)</option>
+              <option value="LJ">진에어 (LJ)</option>
+              <option value="TW">티웨이 (TW)</option>
+              <option value="BX">에어부산 (BX)</option>
+            </select></div>
+        </div>
+        <div class="row2">
+          <div class="ig"><label>노선</label>
+            <select id="route">
+              <option>ICN-NRT</option><option>ICN-PVG</option><option selected>ICN-HKG</option>
+              <option>ICN-BKK</option><option>ICN-LAX</option><option>ICN-CJU</option>
+            </select></div>
+          <div class="ig"><label>지연 (분)</label>
+            <input type="number" id="delayMin" value="90" min="0" max="360"></div>
+        </div>
+        <div class="row2">
+          <div class="ig"><label>지연 원인</label>
+            <select id="delayCause">
+              <option>기상</option><option selected>항공기 정비</option>
+              <option>항공기 접속 지연</option><option>공항 혼잡</option>
+            </select></div>
+          <div class="ig"><label>출발 시간대</label>
+            <select id="hour">
+              <option value="6">06:00 아침</option><option value="8" selected>08:00 피크</option>
+              <option value="12">12:00 낮</option><option value="18">18:00 피크</option>
+              <option value="22">22:00 야간</option>
+            </select></div>
+        </div>
+        <button class="btn btn-primary" onclick="runSim()" id="simBtn">AIDA 시뮬레이션 실행</button>
+      </div>
+
+      <div class="card">
+        <div class="ctitle">📊 AI 지연 위험도</div>
+        <div class="ilabel">지연 발생 확률</div>
+        <div class="rbar"><div class="rfill" id="riskFill" style="width:0%;background:var(--gray)"></div></div>
+        <div id="riskText" style="font-size:12px;color:var(--gray)">시뮬레이션을 실행하세요</div>
+        <div class="insight" id="insightBox" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="card">
+        <div class="ctitle">🤖 AIDA 작동 현황</div>
+        <div class="steps">
+          <div class="step" id="s1"><span class="step-n">①</span>지연 감지</div>
+          <div class="step" id="s2"><span class="step-n">②</span>승객 매핑</div>
+          <div class="step" id="s3"><span class="step-n">③</span>AI 분석</div>
+          <div class="step" id="s4"><span class="step-n">④</span>안내 발송</div>
+        </div>
+        <div class="sbar normal" id="sbar">
+          <div class="sdot"></div>
+          <div id="stext" style="font-size:13px;font-weight:700;">대기 중 — 시뮬레이션을 실행하세요</div>
+        </div>
+        <div class="igrid">
+          <div class="iitem"><div class="ilabel">지연 시간</div>
+            <div class="ival" id="iDelay">—</div><div class="isub" id="iCause">—</div></div>
+          <div class="iitem"><div class="ilabel">알림까지</div>
+            <div class="ival g" id="iSpeed">—</div><div class="isub">감지 후</div></div>
+          <div class="iitem"><div class="ilabel">수하물</div>
+            <div class="ival" id="iBag" style="font-size:13px">—</div>
+            <div class="isub" id="iBagSub">—</div></div>
+          <div class="iitem"><div class="ilabel">대체편</div>
+            <div class="ival" id="iAlt" style="font-size:13px">—</div>
+            <div class="isub" id="iAltSub">—</div></div>
+        </div>
+        <div id="svcList">
+          <div class="svc"><div class="svc-ico">📦</div>
+            <div><div class="svc-t">수하물 추적</div><div class="svc-d">RFID 기반 실시간 위치</div></div>
+            <div class="sbadge bn" id="sv1">대기</div></div>
+          <div class="svc"><div class="svc-ico">✈</div>
+            <div><div class="svc-t">대체편 추천</div><div class="svc-d">AI 최적 연결편 탐색</div></div>
+            <div class="sbadge bn" id="sv2">대기</div></div>
+          <div class="svc"><div class="svc-ico">🎁</div>
+            <div><div class="svc-t">서비스 쿠폰</div><div class="svc-d">식음료·라운지 자동 발급</div></div>
+            <div class="sbadge bn" id="sv3">대기</div></div>
+          <div class="svc"><div class="svc-ico">🌍</div>
+            <div><div class="svc-t">다국어 안내</div><div class="svc-d">10개국어 AI 메시지</div></div>
+            <div class="sbadge bn" id="sv4">대기</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ctitle">💬 AIDA 안내 메시지</div>
+        <div class="lang-tabs">
+          <div class="ltab active" onclick="switchL('ko',this)">🇰🇷 한국어</div>
+          <div class="ltab" onclick="switchL('en',this)">🇺🇸 English</div>
+          <div class="ltab" onclick="switchL('zh',this)">🇨🇳 中文</div>
+          <div class="ltab" onclick="switchL('ja',this)">🇯🇵 日本語</div>
+        </div>
+        <div id="aiTagSim" style="display:none"><span class="ai-tag">✨ Claude AI 생성</span></div>
+        <div class="msgbox" id="simMsg">시뮬레이션을 실행하면 메시지가 생성됩니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PANEL 2: 수하물 맵 ══════════════ -->
+<div class="panel" id="panel-map">
+
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="ctitle">📦 수하물 추적 제어</div>
+        <div class="ig"><label>항공편 번호로 조회</label>
+          <input type="text" id="mapFlight" value="KE823" placeholder="예: KE823"></div>
+        <button class="btn btn-primary btn-sm" onclick="trackBaggage()" style="width:100%;margin-bottom:12px">
+          수하물 추적 시작
+        </button>
+
+        <div id="bagList"></div>
+
+        <div style="margin-top:12px;padding:10px 12px;background:var(--off);border-radius:9px;font-size:11px;color:var(--gray);line-height:1.6">
+          💡 <b>RFID 추적 원리</b><br>
+          각 수하물 태그의 RFID 신호를 공항 내 리더기가 실시간 감지합니다.
+          지연 발생 시 보관소로 자동 이동 후 탑승 30분 전 컨베이어로 재이동합니다.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="padding:14px">
+        <div class="ctitle">🗺 인천공항 수하물 동선 실시간 맵</div>
+        <canvas id="bagMap" style="width:100%;border-radius:10px;"></canvas>
+        <div class="map-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#00B4D8"></div>체크인 카운터</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div>이동 중</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#7C3AED"></div>보관소</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div>컨베이어 준비</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PANEL 3: Claude AI ══════════════ -->
+<div class="panel" id="panel-ai">
+  <div style="max-width:780px;margin:0 auto;">
+    <div class="card">
+      <div class="ctitle">🤖 AI 메시지 생성 — API 키 없이도 작동합니다</div>
+
+      <div class="apikey-bar">
+        <div class="key-status" id="keyDot"></div>
+        <span class="tip">Anthropic API Key (선택):</span>
+        <input type="password" id="apiKey" placeholder="sk-ant-... (없어도 됩니다)" oninput="checkKey(this.value)">
+        <span class="tip" style="color:var(--gray);font-size:10px">입력 시 진짜 Claude AI 사용</span>
+      </div>
+
+      <div class="row2" style="margin-bottom:12px">
+        <div class="ig"><label>항공편</label><input type="text" id="aiFlight" value="KE823"></div>
+        <div class="ig"><label>노선</label>
+          <select id="aiRoute">
+            <option>ICN-NRT</option><option selected>ICN-HKG</option>
+            <option>ICN-LAX</option><option>ICN-BKK</option>
+          </select></div>
+      </div>
+      <div class="row2" style="margin-bottom:12px">
+        <div class="ig"><label>지연 시간 (분)</label><input type="number" id="aiDelay" value="90"></div>
+        <div class="ig"><label>지연 원인</label>
+          <select id="aiCause">
+            <option>기상</option><option selected>항공기 정비</option>
+            <option>항공기 접속 지연</option><option>공항 혼잡</option>
+          </select></div>
+      </div>
+      <div class="ig"><label>승객 특이사항 (선택)</label>
+        <input type="text" id="aiNote" placeholder="예: 환승 연결편 있음, 유아 동반, 휠체어 필요 등"></div>
+
+      <div class="lang-tabs" style="margin-bottom:12px">
+        <div class="ltab active" onclick="setAiLang('ko',this)">🇰🇷 한국어</div>
+        <div class="ltab" onclick="setAiLang('en',this)">🇺🇸 English</div>
+        <div class="ltab" onclick="setAiLang('zh',this)">🇨🇳 中文</div>
+        <div class="ltab" onclick="setAiLang('ja',this)">🇯🇵 日本語</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="callClaude()" id="aiBtn">
+        ✨ Claude AI로 메시지 생성
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">AI 생성 결과</div>
+      <div id="aiResultMeta" style="display:none;margin-bottom:8px">
+        <span class="ai-tag">✨ Claude Sonnet 생성</span>
+        <span style="font-size:11px;color:var(--gray);margin-left:8px" id="aiMeta"></span>
+      </div>
+      <div class="msgbox typing" id="aiResult">버튼을 누르면 AI가 바로 메시지를 생성합니다.
+
+API 키 없이도 작동하며, 키 입력 시 진짜 Claude AI가 더욱 정교한 메시지를 생성합니다.</div>
+    </div>
+
+    <div class="card" style="background:#FFFBEB;border:1px solid #FDE68A">
+      <div class="ctitle" style="color:#92400E">⚡ Claude API 연동 방식 (기술 설명)</div>
+      <div style="font-size:12px;line-height:1.8;color:#78350F">
+        <b>엔드포인트:</b> https://api.anthropic.com/v1/messages<br>
+        <b>모델:</b> claude-sonnet-4-20250514<br>
+        <b>프롬프트 전략:</b> 지연 상황 context + 승객 특이사항 + 언어 지정<br>
+        <b>실제 서비스:</b> 백엔드 서버에서 호출 (API키 노출 없음)<br><br>
+        AIDA는 단순 템플릿이 아닌 <b>승객별 상황을 이해한 AI가 맥락에 맞는 안내</b>를 생성합니다.
+        예: 유아 동반 승객에게는 수유실 위치, 환승객에게는 연결편 게이트를 자동 포함합니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PANEL 4: 실시간 공항 현황 ══════════════ -->
+<div class="panel" id="panel-live">
+  <div style="max-width:960px;margin:0 auto;">
+
+    <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:12px;color:#1E40AF;line-height:1.7">
+      📡 <b>한국 공공데이터포털 실시간 연동</b> — 인천국제공항공사 공식 Open API 사용<br>
+      아래 데이터는 공공데이터포털(data.go.kr) API 키 발급 후 실시간 연동됩니다.
+      데모 모드에서는 <b>실제와 유사한 샘플 데이터</b>로 작동합니다.<br>
+      <span style="color:#10B981;font-weight:700">✅ 사용 API: 인천공항 여객기 운항현황 | 출국장 혼잡도(1분 주기) | 시간대별 승객예고</span>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="ctitle">🔑 공공데이터 API 키 설정</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="password" id="publicApiKey" placeholder="공공데이터포털 API 키 입력 (data.go.kr에서 발급)"
+          style="flex:1;padding:9px 12px;border:1.5px solid #BFDBFE;border-radius:8px;font-size:12px">
+        <button onclick="fetchLiveData()" class="btn btn-primary btn-sm" style="white-space:nowrap">
+          🔄 실시간 불러오기
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--gray);margin-top:6px">
+        키 없이도 샘플 데이터로 UI 확인 가능 | 발급처: <a href="https://www.data.go.kr" target="_blank" style="color:var(--blue)">data.go.kr</a>
+        → "인천국제공항공사_여객기 운항현황 상세 조회 서비스" 검색 후 신청
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-bottom:16px">
+      <div class="card" style="text-align:center">
+        <div class="ilabel">출국장 혼잡도 (T2 기준)</div>
+        <div class="ival" id="liveCongest" style="font-size:28px;color:var(--gold)">-</div>
+        <div class="isub" id="liveCongestSub">출국장 혼잡도 API (1분 주기)</div>
+        <div style="margin-top:8px">
+          <div style="background:var(--light);border-radius:20px;height:8px;overflow:hidden">
+            <div id="congestBar" style="height:100%;border-radius:20px;background:var(--gold);width:0%;transition:width 1s"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="ilabel">오늘 총 출발편 수</div>
+        <div class="ival" id="liveDepartures" style="font-size:28px;color:var(--blue)">-</div>
+        <div class="isub">여객기 운항현황 API</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="ilabel">현재 지연 발생 편수</div>
+        <div class="ival" id="liveDelayed" style="font-size:28px;color:var(--red)">-</div>
+        <div class="isub" id="liveDelayRate">샘플 데이터 버튼을 눌러보세요</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="ctitle" style="margin-bottom:0">🛫 실시간 출발 항공편 현황 (인천공항)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="liveAirlineFilter" onchange="filterFlights()"
+            style="font-size:11px;padding:5px 8px;border-radius:7px;border:1px solid var(--light)">
+            <option value="">전체 항공사</option>
+            <option value="KE">대한항공 (KE)</option>
+            <option value="OZ">아시아나 (OZ)</option>
+            <option value="7C">제주항공 (7C)</option>
+            <option value="LJ">진에어 (LJ)</option>
+          </select>
+          <span id="liveUpdateTime" style="font-size:10px;color:var(--gray)">업데이트: -</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px" id="flightTable">
+          <thead>
+            <tr style="background:var(--navy);color:#fff">
+              <th style="padding:9px 12px;text-align:left">편명</th>
+              <th style="padding:9px 12px;text-align:left">항공사</th>
+              <th style="padding:9px 12px;text-align:left">목적지</th>
+              <th style="padding:9px 12px;text-align:left">출발지</th>
+              <th style="padding:9px 12px;text-align:center">예정출발</th>
+              <th style="padding:9px 12px;text-align:center">변경시간</th>
+              <th style="padding:9px 12px;text-align:center">탑승구</th>
+              <th style="padding:9px 12px;text-align:center">상태</th>
+            </tr>
+          </thead>
+          <tbody id="flightTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--gray)">
+              아래 버튼을 눌러 샘플 데이터를 확인하세요
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="loadSampleFlights()" class="btn btn-primary btn-sm" style="margin-right:8px">
+          📋 샘플 데이터 미리보기
+        </button>
+        <span style="font-size:11px;color:var(--gray)">API 키 연동 시 실시간 자동 갱신</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;background:linear-gradient(135deg,#0A1628,#1565C0);color:#fff">
+      <div class="ctitle" style="color:#90CAF9">🤖 AIDA × 공공데이터 실시간 연동 구조</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+          <div style="font-size:18px;margin-bottom:6px">1️⃣</div>
+          <div style="font-weight:700;margin-bottom:4px;color:#90CAF9">실시간 지연 탐지</div>
+          <div style="color:#B0C4DE">공공데이터 API 폴링 → 지연 감지 즉시 해당 편 승객 자동 매핑</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+          <div style="font-size:18px;margin-bottom:6px">2️⃣</div>
+          <div style="font-weight:700;margin-bottom:4px;color:#90CAF9">RAG 기반 맞춤 안내</div>
+          <div style="color:#B0C4DE">지연 원인·시간·승객 특이사항 → LLM 주입 → 개인화 메시지 생성</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+          <div style="font-size:18px;margin-bottom:6px">3️⃣</div>
+          <div style="font-weight:700;margin-bottom:4px;color:#90CAF9">10개국어 즉시 발송</div>
+          <div style="color:#B0C4DE">승객 국적 자동 감지 → 모국어 메시지 → SMS/앱 푸시 동시 발송</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:#7090B0">
+        활용 공공데이터 출처: 인천국제공항공사 여객기 운항현황(data.go.kr #15112968) |
+        출국장 혼잡도(#15148225) | 승객예고(#15095066)
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  AIDA v2 — AI Delay Assistant | 인천공항 AI-PORT 공모전 출품작 | 화이팅 네이션<br>
+  ♪ 베르디의 오페라 <em>Aida</em>에서 영감 — 혼란 속 승객 곁의 목소리<br>
+  공공데이터 출처: 공공데이터포털(data.go.kr) | 인천국제공항공사
+</footer>
+
+<script>
+// ── State ──────────────────────────────────────────────
+const AL = {KE:'대한항공',OZ:'아시아나','7C':'제주항공',LJ:'진에어',TW:'티웨이',BX:'에어부산'};
+const DR = {KE:.12,OZ:.14,'7C':.20,LJ:.18,TW:.20,BX:.19};
+let msgs = {ko:'',en:'',zh:'',ja:''};
+let curLang = 'ko';
+let aiLang = 'ko';
+let mapTimer = null;
+
+// ── Panel switch ───────────────────────────────────────
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'map') initMap();
+}
+
+// ── Sleep ──────────────────────────────────────────────
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// ══════════════════════════════════════════════════════
+// PANEL 1: 시뮬레이터
+// ══════════════════════════════════════════════════════
+function setStep(n) {
+  ['s1','s2','s3','s4'].forEach((id,i)=>{
+    document.getElementById(id).className='step'+(i<n?' done':i===n?' active':'');
+  });
+}
+function setSbar(type,text) {
+  const b=document.getElementById('sbar');
+  b.className='sbar '+type;
+  document.getElementById('stext').textContent=text;
+}
+function switchL(lang,el) {
+  document.querySelectorAll('.lang-tabs .ltab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  curLang=lang;
+  if(msgs[lang]) document.getElementById('simMsg').textContent=msgs[lang];
+}
+function buildMsgs(flight,airline,route,delay,cause) {
+  const name=AL[airline]||airline, dest=route.split('-')[1];
+  const hasAlt=delay>=60;
+  const altFlight=hasAlt?`${airline}${Math.floor(Math.random()*900+100)}`:'';
+  const coupon=delay>=90?'식사 쿠폰 15,000원':delay>=30?'식사 쿠폰 10,000원':'음료 쿠폰 5,000원';
+
+  msgs.ko=`✈ AIDA 안내 — ${flight}편 (${route})
+${name} | 지연: ${delay}분 | 원인: ${cause}
+
+📦 수하물 상태 (RFID 확인 완료)
+탑승동 B 수하물 보관소 안전 보관 중
+예상 수취: 탑승 30분 전 컨베이어 재이동 예정
+
+✈ 대체편 안내
+${hasAlt?`${altFlight}편 이용 가능 — 카운터 C2 무료 재예약`:`대체편 불필요 — 원편(${flight}) 탑승 예정`}
+
+🎁 보상 서비스 자동 발급
+${coupon} — 제2터미널 3층 전 식음료 매장
+${delay>=90?'라운지 이용권 (밀레니엄 라운지 2시간) 추가 발급':''}
+
+💬 추가 문의: 안내데스크 T2-F3-D7
+AIDA 챗봇: 24시간 10개국어 응대`;
+
+  msgs.en=`✈ AIDA Alert — Flight ${flight} (${route})
+${name} | Delay: ${delay} min | Cause: ${cause}
+
+📦 Baggage Status (RFID Verified)
+Secured at Terminal B storage area
+Est. return to carousel: 30 min before boarding
+
+✈ Alternative Flight
+${hasAlt?`${altFlight} available — Free rebooking at Counter C2`:`No change needed — Original flight (${flight}) on schedule`}
+
+🎁 Compensation Issued Automatically
+${delay>=90?'Meal voucher ₩15,000 + Lounge access (2h)':delay>=30?'Meal voucher ₩10,000':'Beverage voucher ₩5,000'}
+Valid at all F&B outlets, T2 Floor 3
+
+💬 Help: Desk T2-F3-D7 | AIDA Chatbot 24/7`;
+
+  msgs.zh=`✈ AIDA 提醒 — ${flight}航班 (${route})
+${name} | 延误: ${delay}分钟 | 原因: ${cause}
+
+📦 行李状态（RFID已确认）
+已安全存放于B航站楼行李房
+预计归还: 登机前30分钟放回传送带
+
+✈ 备选航班
+${hasAlt?`${altFlight}可免费改签 — 请前往C2柜台`:`无需更换 — 原航班(${flight})将按时出发`}
+
+🎁 补偿服务（已自动发放）
+${delay>=90?'15,000韩元餐券 + 贵宾室2小时入场':delay>=30?'10,000韩元餐券':'5,000韩元饮品券'}
+
+💬 咨询: T2-F3-D7服务台`;
+
+  msgs.ja=`✈ AIDAお知らせ — ${flight}便 (${route})
+${name} | 遅延: ${delay}分 | 理由: ${cause}
+
+📦 手荷物状況（RFID確認済み）
+Bターミナル手荷物保管所にて安全保管中
+お渡し予定: 搭乗30分前にベルトコンベアへ
+
+✈ 代替便
+${hasAlt?`${altFlight}便へ無料変更可 — C2カウンター`:`変更不要 — 元便(${flight})は予定通り出発`}
+
+🎁 補償サービス（自動発行済み）
+${delay>=90?'食事券15,000ウォン + ラウンジ利用券(2時間)':delay>=30?'食事券10,000ウォン':'飲み物券5,000ウォン'}
+
+💬 お問い合わせ: T2-F3-D7デスク`;
+}
+
+async function typeMsg(text, elId) {
+  const el = document.getElementById(elId);
+  el.textContent='';
+  el.classList.add('typing');
+  for(let i=0;i<text.length;i++){
+    el.textContent=text.slice(0,i+1);
+    if(i%5===0) await sleep(8);
+  }
+  el.classList.remove('typing');
+}
+
+async function runSim() {
+  const flight  = document.getElementById('flightNo').value||'KE123';
+  const airline = document.getElementById('airline').value;
+  const route   = document.getElementById('route').value;
+  const delay   = parseInt(document.getElementById('delayMin').value)||0;
+  const cause   = document.getElementById('delayCause').value;
+  const hour    = parseInt(document.getElementById('hour').value);
+
+  const btn=document.getElementById('simBtn');
+  btn.innerHTML='<span class="spinner"></span> AIDA 작동 중...';
+  btn.disabled=true;
+
+  setStep(0); msgs={ko:'',en:'',zh:'',ja:''};
+  document.getElementById('aiTagSim').style.display='none';
+  document.querySelectorAll('#svcList .sbadge').forEach(b=>{b.className='sbadge bn';b.textContent='대기';});
+  document.querySelectorAll('#svcList .svc').forEach(s=>s.className='svc');
+
+  const sc = delay===0?'normal':delay<60?'delay':'severe';
+  const st = delay===0?'정상 운항':`${delay}분 지연`;
+
+  await sleep(500); setStep(0);
+  setSbar(sc,`① 지연 감지 — ${flight}편 ${st}`);
+  document.getElementById('iDelay').textContent=delay===0?'정상':`${delay}분`;
+  document.getElementById('iDelay').className='ival '+(delay===0?'g':delay<60?'o':'r');
+  document.getElementById('iCause').textContent=delay===0?'정상 운항':cause;
+
+  await sleep(600); setStep(1);
+  setSbar('delay','② 예약 기반 수하물·환승 매핑 중...');
+  document.getElementById('iBag').textContent='추적 중';
+  document.getElementById('iBagSub').textContent='RFID 스캔 중';
+
+  await sleep(700); setStep(2);
+  setSbar('delay','③ Claude AI 분석 중...');
+  document.getElementById('iBag').textContent='보관소 B';
+  document.getElementById('iBagSub').textContent='안전 보관 ✓';
+  const altFlight=delay>=60?`${airline}${Math.floor(Math.random()*900+100)}`:'불필요';
+  document.getElementById('iAlt').textContent=altFlight;
+  document.getElementById('iAltSub').textContent=delay>=60?'C2 카운터':'원편 탑승';
+
+  // Risk
+  let risk=DR[airline]||.15;
+  if([6,7,8,9,17,18,19,20].includes(hour)) risk*=1.4;
+  risk=Math.min(risk,.9);
+  const pct=Math.round(risk*100);
+  const rc=risk>.25?'var(--red)':risk>.15?'var(--gold)':'var(--green)';
+  document.getElementById('riskFill').style.cssText=`width:${pct}%;background:${rc}`;
+  document.getElementById('riskText').textContent=`${pct}% — ${risk>.25?'높음 🔴':risk>.15?'보통 🟡':'낮음 🟢'}`;
+  const ib=document.getElementById('insightBox');
+  ib.style.display='block';
+  ib.textContent=hour>=6&&hour<=9?
+    `💡 아침 피크(06~09시)는 지연 확률이 40% 높습니다. AIDA가 1시간 전부터 모니터링합니다.`:
+    `💡 AIDA가 실시간으로 지연 위험을 감지하고 있습니다.`;
+
+  await sleep(800); setStep(3);
+  setSbar(sc,`④ 안내 메시지 발송 완료 — ${delay===0?'정상 운항':`${delay}분 지연 대응 완료`}`);
+  document.getElementById('iSpeed').textContent='< 3분';
+
+  const svcs=document.querySelectorAll('#svcList .svc');
+  const badges=document.querySelectorAll('#svcList .sbadge');
+  [[true,'bd','완료'],[delay>=30,'bd','추천'],
+   [true,'bd',delay>=90?'15,000원':delay>=30?'10,000원':'5,000원'],
+   [true,'bd','4개국어']].forEach(([on,cls,txt],i)=>{
+    svcs[i].className='svc'+(on?' on':'');
+    badges[i].className='sbadge '+cls;
+    badges[i].textContent=txt;
+    if(!on){badges[i].className='sbadge bn';badges[i].textContent='해당없음';}
+  });
+
+  buildMsgs(flight,airline,route,delay,cause);
+  await typeMsg(msgs.ko,'simMsg');
+
+  btn.innerHTML='✓ 다시 실행'; btn.disabled=false;
+}
+
+// ══════════════════════════════════════════════════════
+// PANEL 2: 수하물 맵
+// ══════════════════════════════════════════════════════
+const MAP_W=700, MAP_H=400;
+let canvas, ctx, bags=[], animFrame=null;
+
+const ZONES=[
+  {x:30, y:40,  w:120,h:60, label:'체크인 카운터',  color:'rgba(0,180,216,.15)', stroke:'#00B4D8'},
+  {x:200,y:20,  w:110,h:55, label:'보안 검색',       color:'rgba(100,116,139,.1)',stroke:'#94A3B8'},
+  {x:350,y:20,  w:110,h:55, label:'탑승동 A',        color:'rgba(21,101,192,.15)',stroke:'#1565C0'},
+  {x:500,y:20,  w:130,h:55, label:'탑승동 B',        color:'rgba(21,101,192,.15)',stroke:'#1565C0'},
+  {x:30, y:160, w:160,h:80, label:'수하물 보관소 B', color:'rgba(124,58,237,.15)',stroke:'#7C3AED'},
+  {x:240,y:160, w:160,h:80, label:'X-Ray 검사',      color:'rgba(100,116,139,.1)',stroke:'#94A3B8'},
+  {x:450,y:160, w:160,h:80, label:'컨베이어 벨트',   color:'rgba(16,185,129,.15)',stroke:'#10B981'},
+  {x:100,y:300, w:500,h:70, label:'지하 수하물 이동 통로 (자동화)',color:'rgba(100,116,139,.07)',stroke:'#CBD5E1'},
+];
+
+const WAYPOINTS={
+  checkin:{x:90,y:70}, security:{x:255,y:47}, gateA:{x:405,y:47},
+  gateB:{x:565,y:47}, storage:{x:110,y:200}, xray:{x:320,y:200},
+  carousel:{x:530,y:200}, tunnel:{x:350,y:335}
+};
+
+function makeBags(flight) {
+  const nums=['A','B','C','D','E'];
+  return nums.map((n,i)=>({
+    id:`${flight}-${n}`,
+    label:`${flight}-${String.fromCharCode(65+i)}`,
+    x:WAYPOINTS.checkin.x, y:WAYPOINTS.checkin.y,
+    tx:WAYPOINTS.checkin.x, ty:WAYPOINTS.checkin.y,
+    color:['#00B4D8','#F59E0B','#7C3AED','#10B981','#EF4444'][i],
+    status:'체크인',
+    phase:0, phaseTimer:i*60+Math.random()*40|0,
+  }));
+}
+
+const PHASES=[
+  {wp:'checkin',  status:'체크인',      delay:80},
+  {wp:'tunnel',   status:'이동 중',     delay:100},
+  {wp:'xray',     status:'X-Ray 검사',  delay:80},
+  {wp:'storage',  status:'보관소 B 보관',delay:120},
+  {wp:'tunnel',   status:'이동 중',     delay:100},
+  {wp:'carousel', status:'컨베이어 준비',delay:0},
+];
+
+function initMap() {
+  if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
+  canvas=document.getElementById('bagMap');
+  canvas.width=MAP_W; canvas.height=MAP_H;
+  ctx=canvas.getContext('2d');
+  const fl=document.getElementById('mapFlight').value||'KE823';
+  bags=makeBags(fl);
+  updateBagList();
+  drawMap();
+}
+
+function trackBaggage() {
+  initMap();
+}
+
+function drawMap() {
+  ctx.clearRect(0,0,MAP_W,MAP_H);
+  ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,MAP_W,MAP_H);
+
+  // Zones
+  ZONES.forEach(z=>{
+    ctx.fillStyle=z.color; ctx.strokeStyle=z.stroke; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(z.x,z.y,z.w,z.h,8);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle=z.stroke; ctx.font='bold 10px sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(z.label,z.x+z.w/2,z.y+z.h/2+4);
+  });
+
+  // Tunnel arrows
+  ctx.strokeStyle='rgba(100,116,139,.3)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+  ctx.beginPath(); ctx.moveTo(100,270); ctx.lineTo(600,270); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Update bag positions
+  bags.forEach(b=>{
+    b.phaseTimer--;
+    if(b.phaseTimer<=0 && b.phase<PHASES.length){
+      const p=PHASES[b.phase];
+      const wp=WAYPOINTS[p.wp];
+      b.tx=wp.x+(Math.random()*20-10)|0;
+      b.ty=wp.y+(Math.random()*20-10)|0;
+      b.status=p.status;
+      b.phase++;
+      b.phaseTimer=p.delay;
+    }
+    b.x+=(b.tx-b.x)*.04;
+    b.y+=(b.ty-b.y)*.04;
+  });
+
+  // Draw bags
+  bags.forEach(b=>{
+    // Glow
+    const grd=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,14);
+    grd.addColorStop(0,b.color+'66'); grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(b.x,b.y,14,0,Math.PI*2); ctx.fill();
+    // Dot
+    ctx.fillStyle=b.color; ctx.beginPath(); ctx.arc(b.x,b.y,6,0,Math.PI*2); ctx.fill();
+    // Label
+    ctx.fillStyle='#fff'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(b.label,b.x,b.y-12);
+  });
+
+  updateBagList();
+  animFrame=requestAnimationFrame(drawMap);
+}
+
+function updateBagList() {
+  const el=document.getElementById('bagList');
+  if(!bags.length){el.innerHTML='';return;}
+  const statusColor={'체크인':'bs-move','이동 중':'bs-move','X-Ray 검사':'bs-move',
+    '보관소 B 보관':'bs-store','컨베이어 준비':'bs-ready'};
+  const cardClass={'체크인':'','이동 중':'moving','보관소 B 보관':'stored','컨베이어 준비':'ready','X-Ray 검사':''};
+  el.innerHTML=bags.map(b=>`
+    <div class="bag-card ${cardClass[b.status]||''}">
+      <div style="width:10px;height:10px;border-radius:50%;background:${b.color};flex-shrink:0"></div>
+      <div><div class="bag-num">${b.label}</div>
+        <div class="bag-info">위치: ${b.status}</div></div>
+      <div class="bag-status ${statusColor[b.status]||'bs-move'}">${b.status}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// PANEL 3: Claude API
+// ══════════════════════════════════════════════════════
+function checkKey(v){
+  document.getElementById('keyDot').className='key-status'+(v.startsWith('sk-ant-')?' ok':'');
+}
+function setAiLang(lang,el){
+  document.querySelectorAll('#panel-ai .lang-tabs .ltab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); aiLang=lang;
+}
+
+function buildLocalMsg(flight, route, delay, cause, note, lang) {
+  const d = parseInt(delay)||0;
+  const dest = route.split('-')[1];
+  const coupon = d>=90?'식사쿠폰 15,000원 + 라운지이용권(2시간)':d>=30?'식사쿠폰 10,000원':'음료쿠폰 5,000원';
+  const hasAlt = d>=60;
+  const altFlight = flight.slice(0,2)+Math.floor(Math.random()*900+100);
+  const hasTransit = note.includes('환승');
+  const hasInfant  = note.includes('유아')||note.includes('아기');
+  const hasWC      = note.includes('휠체어');
+  const isBiz      = note.includes('비즈니스');
+
+  const m = {
+    ko:`✈ AIDA 안내 — ${flight}편 (${route})
+${cause}으로 인해 ${d}분 지연되었습니다. 불편을 드려 진심으로 사과드립니다.
+
+📦 수하물: 탑승동 B 보관소 안전 보관 중 (RFID 확인 완료)
+   탑승 30분 전 컨베이어 자동 이동 예정
+${hasAlt?`\n✈ 대체편: ${altFlight}편 이용 가능\n   카운터 C2에서 무료 재예약 (수수료 없음)\n`:''}${hasTransit?`\n🔗 환승 연결편: ${dest} 공항 도착 후 AIDA 안내문 제시 시 우선 탑승 지원\n`:''}
+🎁 보상 서비스: ${coupon} 자동 발급
+   T2 3층 전 식음료 매장에서 사용 가능
+${hasInfant?`\n👶 유아 동반 서비스: T2 2층 가족라운지·수유실 이용 가능\n`:''}${hasWC?`\n♿ 휠체어 지원: 안내데스크 T2-F3-D7 호출 시 즉시 지원\n`:''}${isBiz?`\n💺 비즈니스 라운지: 탑승동 B 3층 스카이허브 라운지 이용 가능\n`:''}
+💬 추가 문의: 안내데스크 T2-F3-D7 | AIDA 챗봇 24시간 운영`,
+
+    en:`✈ AIDA Alert — Flight ${flight} (${route})
+Your flight is delayed ${d} min due to ${cause}. We sincerely apologize for the inconvenience.
+
+📦 Baggage: Secured at Terminal B storage (RFID verified)
+   Will be returned to carousel 30 min before boarding
+${hasAlt?`\n✈ Alt. Flight: ${altFlight} available\n   Free rebooking at Counter C2 — no fee\n`:''}${hasTransit?`\n🔗 Connecting Flight: Show AIDA notice at ${dest} airport for priority boarding assistance\n`:''}
+🎁 Compensation: ${d>=90?'Meal voucher ₩15,000 + Lounge access (2h)':d>=30?'Meal voucher ₩10,000':'Beverage voucher ₩5,000'} issued automatically
+   Valid at all F&B outlets, T2 Floor 3
+${hasInfant?`\n👶 Family Service: Family lounge & nursing room available at T2 Floor 2\n`:''}${hasWC?`\n♿ Wheelchair: Call Desk T2-F3-D7 for immediate assistance\n`:''}
+💬 Help: Desk T2-F3-D7 | AIDA Chatbot available 24/7`,
+
+    zh:`✈ AIDA 提醒 — ${flight}航班 (${route})
+因${cause}，您的航班延误${d}分钟。对此深表歉意。
+
+📦 行李: 已安全存放于B航站楼行李房（RFID已确认）
+   登机前30分钟自动转移至传送带
+${hasAlt?`\n✈ 备选航班: ${altFlight}可免费改签\n   请前往C2柜台办理，无需手续费\n`:''}${hasTransit?`\n🔗 转机航班: 抵达${dest}机场后出示AIDA通知可享优先登机\n`:''}
+🎁 补偿服务: ${d>=90?'15,000韩元餐券 + 贵宾室2小时':d>=30?'10,000韩元餐券':'5,000韩元饮品券'} 已自动发放
+   适用于T2三层所有餐饮店铺
+${hasInfant?`\n👶 婴幼儿服务: T2二层家庭休息室及哺乳室开放\n`:''}
+💬 咨询: T2-F3-D7服务台 | AIDA客服24小时`,
+
+    ja:`✈ AIDAお知らせ — ${flight}便 (${route})
+${cause}により${d}分の遅延が発生しました。誠に申し訳ございません。
+
+📦 手荷物: Bターミナル手荷物保管所にて安全保管中（RFID確認済み）
+   搭乗30分前にベルトコンベアへ自動移動予定
+${hasAlt?`\n✈ 代替便: ${altFlight}便へ無料変更可\n   C2カウンターにてお手続き（手数料なし）\n`:''}${hasTransit?`\n🔗 乗り継ぎ便: ${dest}空港でAIDA通知書をご提示で優先搭乗サポート\n`:''}
+🎁 補償サービス: ${d>=90?'食事券15,000ウォン + ラウンジ利用券(2時間)':d>=30?'食事券10,000ウォン':'飲み物券5,000ウォン'} を自動発行
+   T2 3階全飲食店でご利用いただけます
+${hasInfant?`\n👶 ご家族サービス: T2 2階ファミリーラウンジ・授乳室をご利用ください\n`:''}
+💬 お問い合わせ: T2-F3-D7デスク | AIDAチャットボット24時間対応`
+  };
+  return m[lang]||m.ko;
+}
+
+async function callClaude() {
+  const key   = document.getElementById('apiKey').value.trim();
+  const flight= document.getElementById('aiFlight').value||'KE823';
+  const route = document.getElementById('aiRoute').value;
+  const delay = document.getElementById('aiDelay').value;
+  const cause = document.getElementById('aiCause').value;
+  const note  = document.getElementById('aiNote').value;
+
+  const resultEl=document.getElementById('aiResult');
+  const btn=document.getElementById('aiBtn');
+
+  btn.innerHTML='<span class="spinner"></span> AI 생성 중...'; btn.disabled=true;
+  resultEl.textContent=''; resultEl.classList.add('typing');
+  document.getElementById('aiResultMeta').style.display='none';
+
+  const langMap={ko:'한국어',en:'영어(English)',zh:'중국어(中文)',ja:'일본어(日本語)'};
+  const langName=langMap[aiLang]||'한국어';
+  const d=parseInt(delay)||0;
+
+  // API 키가 있으면 Claude API 시도, 없으면 바로 로컬 생성
+  if(key && key.startsWith('sk-ant-')) {
+    const prompt=`당신은 인천국제공항의 AI 여객 서비스 어시스턴트 AIDA입니다.
+항공기 지연 시 승객에게 보내는 개인화 안내 메시지를 작성하세요.
+
+상황: ${flight}편 (${route}) ${d}분 지연 / 원인: ${cause}
+수하물: 탑승동 B 보관소 안전 보관 중 (RFID 확인)
+대체편: ${d>=60?`대체편 안내 포함`:'원편 탑승 안내'}
+보상: ${d>=90?'식사쿠폰 15,000원 + 라운지':d>=30?'식사쿠폰 10,000원':'음료쿠폰 5,000원'}
+승객 특이사항: ${note||'없음'}
+
+규칙: ${langName}로만 작성 / 특이사항 반드시 반영 / 이모지 활용 / 따뜻한 톤 / 300자 내외 / 메시지만 출력`;
+
+    const t0=Date.now();
+    try {
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key':key,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1000,
+          messages:[{role:'user',content:prompt}]
+        })
+      });
+      const data=await resp.json();
+      if(data.error) throw new Error(data.error.message);
+
+      const text=data.content[0].text;
+      const elapsed=((Date.now()-t0)/1000).toFixed(1);
+      resultEl.classList.remove('typing');
+      resultEl.textContent='';
+      for(let i=0;i<text.length;i++){
+        resultEl.textContent=text.slice(0,i+1);
+        if(i%3===0) await sleep(15);
+      }
+      document.getElementById('aiResultMeta').style.display='block';
+      document.getElementById('aiMeta').textContent=
+        `✨ Claude AI 생성 | ${elapsed}초 | ${data.usage?.input_tokens||'?'}+${data.usage?.output_tokens||'?'} 토큰`;
+      msgs[aiLang]=text;
+      btn.innerHTML='✨ Claude AI로 메시지 생성'; btn.disabled=false;
+      return;
+    } catch(e) {
+      // API 실패 시 로컬로 폴백
+    }
+  }
+
+  // 로컬 생성 모드 (API 키 없거나 호출 실패 시)
+  await sleep(600); // 생성 중 느낌 연출
+  const text = buildLocalMsg(flight, route, delay, cause, note, aiLang);
+  resultEl.classList.remove('typing');
+  resultEl.textContent='';
+  for(let i=0;i<text.length;i++){
+    resultEl.textContent=text.slice(0,i+1);
+    if(i%3===0) await sleep(10);
+  }
+  document.getElementById('aiResultMeta').style.display='block';
+  document.getElementById('aiMeta').textContent=
+    key?'⚡ 로컬 AI 생성 (API 연결 실패 — 키 확인 후 재시도)':'⚡ 로컬 AI 생성 모드 (API 키 없음)';
+  msgs[aiLang]=text;
+  btn.innerHTML='✨ Claude AI로 메시지 생성'; btn.disabled=false;
+}
+
+// ══════════════════════════════════════════════════════
+// PANEL 4: 실시간 공항 현황 — 공공데이터 연동
+// ══════════════════════════════════════════════════════
+
+// 샘플 항공편 데이터 (공공데이터 API 구조 기반)
+const SAMPLE_FLIGHTS = [
+  { flightId:'KE001', airline:'대한항공', dest:'도쿄 나리타', origin:'ICN', schedTime:'08:30', chgTime:'08:30', gate:'132', status:'정상', terminal:'T2' },
+  { flightId:'OZ201', airline:'아시아나항공', dest:'홍콩', origin:'ICN', schedTime:'08:55', chgTime:'09:40', gate:'108', status:'지연 45분', terminal:'T1' },
+  { flightId:'7C1001', airline:'제주항공', dest:'오사카 간사이', origin:'ICN', schedTime:'09:10', chgTime:'09:10', gate:'43', status:'탑승중', terminal:'T1' },
+  { flightId:'KE085', airline:'대한항공', dest:'뉴욕 JFK', origin:'ICN', schedTime:'09:25', chgTime:'10:55', gate:'140', status:'지연 90분', terminal:'T2' },
+  { flightId:'LJ301', airline:'진에어', dest:'방콕 수완나품', origin:'ICN', schedTime:'09:40', chgTime:'09:40', gate:'55', status:'정상', terminal:'T1' },
+  { flightId:'OZ741', airline:'아시아나항공', dest:'싱가포르', origin:'ICN', schedTime:'10:05', chgTime:'10:05', gate:'117', status:'정상', terminal:'T1' },
+  { flightId:'TW302', airline:'티웨이항공', dest:'후쿠오카', origin:'ICN', schedTime:'10:20', chgTime:'11:05', gate:'36', status:'지연 45분', terminal:'T1' },
+  { flightId:'KE631', airline:'대한항공', dest:'파리 CDG', origin:'ICN', schedTime:'10:45', chgTime:'10:45', gate:'131', status:'게이트오픈', terminal:'T2' },
+  { flightId:'BX391', airline:'에어부산', dest:'세부', origin:'ICN', schedTime:'11:00', chgTime:'11:00', gate:'22', status:'정상', terminal:'T1' },
+  { flightId:'OZ571', airline:'아시아나항공', dest:'프랑크푸르트', origin:'ICN', schedTime:'11:15', chgTime:'11:15', gate:'122', status:'정상', terminal:'T1' },
+  { flightId:'7C1411', airline:'제주항공', dest:'다낭', origin:'ICN', schedTime:'11:30', chgTime:'12:30', gate:'48', status:'지연 60분', terminal:'T1' },
+  { flightId:'KE191', airline:'대한항공', dest:'LA', origin:'ICN', schedTime:'11:50', chgTime:'11:50', gate:'139', status:'정상', terminal:'T2' },
+];
+
+let allFlights = [];
+
+function loadSampleFlights() {
+  allFlights = SAMPLE_FLIGHTS;
+
+  // 통계 계산
+  const total = allFlights.length;
+  const delayed = allFlights.filter(f => f.status.includes('지연')).length;
+  const rate = Math.round(delayed / total * 100);
+
+  document.getElementById('liveDepartures').textContent = total + '편';
+  document.getElementById('liveDelayed').textContent = delayed + '편';
+  document.getElementById('liveDelayRate').textContent = `지연율 ${rate}% (샘플 데이터)`;
+
+  // 혼잡도 샘플
+  const congestion = 847;
+  const maxCong = 2000;
+  const pct = Math.round(congestion / maxCong * 100);
+  document.getElementById('liveCongest').textContent = congestion + '명';
+  document.getElementById('liveCongestSub').textContent = `대기 인원 (T2 기준) — 혼잡도 ${pct}%`;
+  document.getElementById('congestBar').style.width = pct + '%';
+  document.getElementById('congestBar').style.background =
+    pct > 70 ? 'var(--red)' : pct > 40 ? 'var(--gold)' : 'var(--green)';
+
+  document.getElementById('liveUpdateTime').textContent =
+    '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
+
+  renderFlightTable(allFlights);
+}
+
+function renderFlightTable(flights) {
+  const statusColor = {
+    '정상': '#10B981', '탑승중': '#1565C0', '게이트오픈': '#7C3AED',
+  };
+  const tbody = document.getElementById('flightTableBody');
+  if (!flights.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--gray)">데이터 없음</td></tr>';
+    return;
+  }
+  tbody.innerHTML = flights.map(f => {
+    const isDelay = f.status.includes('지연');
+    const rowBg = isDelay ? 'background:#FEF3C7' : '';
+    const statusColor = isDelay ? '#B45309' :
+      f.status === '탑승중' ? '#1565C0' :
+      f.status === '게이트오픈' ? '#6D28D9' : '#065F46';
+    const statusBg = isDelay ? '#FDE68A' :
+      f.status === '탑승중' ? '#DBEAFE' :
+      f.status === '게이트오픈' ? '#EDE9FE' : '#D1FAE5';
+    const chgDiff = f.chgTime !== f.schedTime ?
+      `<span style="color:var(--red);font-weight:700">${f.chgTime}</span>` :
+      `<span style="color:var(--gray)">${f.chgTime}</span>`;
+    return `<tr style="${rowBg};border-bottom:1px solid var(--light)">
+      <td style="padding:9px 12px;font-weight:700">${f.flightId}</td>
+      <td style="padding:9px 12px">${f.airline}</td>
+      <td style="padding:9px 12px">${f.dest}</td>
+      <td style="padding:9px 12px;color:var(--gray)">${f.origin}</td>
+      <td style="padding:9px 12px;text-align:center">${f.schedTime}</td>
+      <td style="padding:9px 12px;text-align:center">${chgDiff}</td>
+      <td style="padding:9px 12px;text-align:center;font-weight:700">${f.gate}</td>
+      <td style="padding:9px 12px;text-align:center">
+        <span style="background:${statusBg};color:${statusColor};font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px">${f.status}</span>
+        ${isDelay ? `<button onclick="triggerAIDA('${f.flightId}','${f.status}')" style="margin-left:6px;background:var(--blue);color:#fff;border:none;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:700">AIDA 발동</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterFlights() {
+  const filter = document.getElementById('liveAirlineFilter').value;
+  const filtered = filter
+    ? allFlights.filter(f => f.flightId.startsWith(filter))
+    : allFlights;
+  renderFlightTable(filtered);
+}
+
+function triggerAIDA(flightId, status) {
+  // 시뮬레이터 탭으로 이동하고 해당 항공편 자동 입력
+  const delayMatch = status.match(/(\d+)분/);
+  const delayMin = delayMatch ? delayMatch[1] : '45';
+
+  document.getElementById('flightNo').value = flightId;
+  document.getElementById('delayMin').value = delayMin;
+
+  // 탭 전환
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-sim').classList.add('active');
+  document.querySelectorAll('.mtab')[0].classList.add('active');
+
+  // 자동 시뮬레이션 실행
+  setTimeout(() => runSim(), 300);
+}
+
+async function fetchLiveData() {
+  const key = document.getElementById('publicApiKey').value.trim();
+  if (!key) {
+    alert('API 키를 입력하거나 아래 "샘플 데이터 미리보기" 버튼을 눌러주세요.\n\n발급: data.go.kr → 인천국제공항공사_여객기 운항현황 상세 조회 서비스');
+    return;
+  }
+
+  document.getElementById('liveUpdateTime').textContent = '불러오는 중...';
+
+  // 실제 공공데이터 API 호출 (CORS 우회를 위해 서버사이드 필요 - 여기서는 샘플로 대체)
+  // 실제 배포 시: Vercel API Route /api/flights.js 에서 호출
+  try {
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const url = `https://apis.data.go.kr/B551177/StatusOfPassengerFlightsOdp/getPassengerDeparturesDailyList?serviceKey=${encodeURIComponent(key)}&from_time=0000&to_time=2400&lang=K&type=json&airport=ICN&numOfRows=30`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data?.response?.body?.items) {
+      const items = data.response.body.items.item || [];
+      allFlights = items.map(item => ({
+        flightId: item.flightId || '-',
+        airline: item.airlineKorean || item.airline || '-',
+        dest: item.airport || '-',
+        origin: 'ICN',
+        schedTime: (item.scheduleDateTime || '').slice(8, 12).replace(/(\d{2})(\d{2})/, '$1:$2'),
+        chgTime: (item.estimatedDateTime || item.scheduleDateTime || '').slice(8, 12).replace(/(\d{2})(\d{2})/, '$1:$2'),
+        gate: item.gate || '-',
+        status: item.remark || '정상',
+        terminal: item.terminalId === 'P01' ? 'T1' : 'T2',
+      }));
+
+      const total = allFlights.length;
+      const delayed = allFlights.filter(f => f.status && f.status !== '정상' && f.status !== '출발').length;
+      document.getElementById('liveDepartures').textContent = total + '편';
+      document.getElementById('liveDelayed').textContent = delayed + '편';
+      document.getElementById('liveDelayRate').textContent = `지연율 ${Math.round(delayed/total*100)}% (실시간)`;
+      document.getElementById('liveUpdateTime').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
+      renderFlightTable(allFlights);
+    } else {
+      throw new Error('데이터 없음');
+    }
+  } catch (e) {
+    // API 실패 시 샘플로 폴백
+    document.getElementById('liveUpdateTime').textContent = '⚠ API 오류 — 샘플 데이터로 표시';
+    loadSampleFlights();
+  }
+}
+</script>
+</body>
+</html>
