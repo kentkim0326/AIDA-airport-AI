@@ -825,7 +825,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
     <div class="modal-head">
       <div>
         <div class="mlogo">AI<span>DA</span> v3</div>
-        <div class="msub">오늘 인천공항 출발편 실시간 현황 — 편명·날짜·지연 정보 확인 후 선택하면 시뮬레이터에 바로 연동</div>
+        <div class="msub">오늘 인천공항 도착편 실시간 현황 — 편명·날짜·지연 정보 확인 후 선택하면 시뮬레이터에 바로 연동</div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
@@ -854,7 +854,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
     <div class="modal-body" id="modalBody">
       <div class="modal-loading">
         <div class="big-spinner"></div>
-        공공데이터 API에서 오늘의 항공편을 불러오는 중...<br>
+        공공데이터 API에서 오늘의 도착편을 불러오는 중...<br>
         <span style="font-size:11px;color:var(--gray);margin-top:6px;display:block">인천국제공항공사 실시간 데이터</span>
       </div>
     </div>
@@ -1077,10 +1077,10 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
       <span style="font-size:22px">📡</span>
       <div>
         <b>인천국제공항공사 공공데이터 실시간 연동 (v3)</b><br>
-        <span class="live-dot"></span>API 키 내장 — 버튼 클릭만으로 실시간 데이터 로드 | 출발·도착 탭 지원 | 1분 자동 갱신
+        <span class="live-dot"></span>인천공항 도착편 실시간 데이터 | 공공데이터 입국장 API 연동 | 지연 정보 자동 계산
       </div>
-      <button onclick="fetchLiveData('arr')" class="btn btn-green btn-sm" style="margin-left:auto;white-space:nowrap">
-        🔄 실시간 데이터 불러오기
+      <button onclick="fetchLiveData('dep')" class="btn btn-green btn-sm" style="margin-left:auto;white-space:nowrap">
+        🔄 오늘 도착편 불러오기
       </button>
     </div>
 
@@ -1109,7 +1109,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="ctitle" style="margin-bottom:0">🛫 실시간 출발 항공편 현황</div>
+        <div class="ctitle" style="margin-bottom:0">🛬 실시간 도착 항공편 현황</div>
         <div style="display:flex;gap:8px;align-items:center">
           <select id="liveAirlineFilter" onchange="filterFlights()"
             style="font-size:11px;padding:5px 8px;border-radius:7px;border:1px solid var(--light)">
@@ -1134,7 +1134,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
             <tr style="background:var(--navy);color:#fff">
               <th style="padding:9px 12px;text-align:left">편명</th>
               <th style="padding:9px 12px;text-align:left">항공사</th>
-              <th style="padding:9px 12px;text-align:left">목적지</th>
+              <th style="padding:9px 12px;text-align:left">출발지</th>
               <th style="padding:9px 12px;text-align:center">예정출발</th>
               <th style="padding:9px 12px;text-align:center">변경시간</th>
               <th style="padding:9px 12px;text-align:center">터미널</th>
@@ -1418,7 +1418,7 @@ function showPanel(id, el) {
   document.getElementById('panel-'+id).classList.add('active');
   el.classList.add('active');
   if (id==='map') initMap();
-  if (id==='live') fetchLiveData('arr');
+  if (id==='live') fetchLiveData('dep');
   if (id==='arrivals') fetchArrivals();
 }
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
@@ -1636,7 +1636,7 @@ async function fetchLiveData(type) {
   }
   updateLiveStats();
   renderFlightTable(allFlights);
-  if(btn){btn.innerHTML='🔄 실시간 데이터 불러오기';btn.disabled=false;}
+  if(btn){btn.innerHTML='🔄 오늘 도착편 불러오기';btn.disabled=false;}
 }
 
 
@@ -1950,7 +1950,7 @@ const UI_STRINGS = {
   ko: {
     tabs:['✈ 지연 시뮬레이터','📡 실시간 운항현황','🛬 입국장 혼잡도','📦 수하물 실시간 맵','🤖 AI 메시지 생성','🗺 공항 주변 지도','💬 여행자 채팅방'],
     simBtn:'AIDA 시뮬레이션 실행', simReset:'✓ 다시 실행',
-    liveBtn:'🔄 실시간 데이터 불러오기', arrBtn:'🔄 혼잡도 불러오기',
+    liveBtn:'🔄 오늘 도착편 불러오기', arrBtn:'🔄 혼잡도 불러오기',
     flightLabel:'항공편 번호', airlineLabel:'항공사', routeLabel:'노선',
     delayLabel:'지연 (분)', causeLabel:'지연 원인', hourLabel:'출발 시간대',
     statusAll:'전체 상태', delayOnly:'지연만', normalOnly:'정상만',
@@ -2120,9 +2120,9 @@ function renderModalFlights() {
           ${paxHtml}
         </div>
         <div class="fc-route">
-          <b style="color:var(--cyan)">ICN 인천</b>
-          <span style="margin:0 5px;color:var(--gray)">→</span>
           <b>${f.dest}</b>
+          <span style="margin:0 5px;color:var(--gray)">→</span>
+          <b style="color:var(--cyan)">ICN 인천</b>
           <span style="color:var(--gray)"> (${f.destCode})</span>
           &nbsp;|&nbsp; ${f.date}
           &nbsp;|&nbsp; ${f.terminal} 게이트 ${f.gate}
@@ -2208,7 +2208,7 @@ function airportName(code) {
 async function loadModalFlights() {
   const body = document.getElementById('modalBody');
   body.innerHTML = `<div class="modal-loading"><div class="big-spinner"></div>
-    공공데이터 API에서 오늘의 항공편을 불러오는 중...<br>
+    공공데이터 API에서 오늘의 도착편을 불러오는 중...<br>
     <span style="font-size:11px;color:var(--gray);margin-top:6px;display:block">인천국제공항공사 실시간 데이터</span>
   </div>`;
 
@@ -2531,7 +2531,14 @@ function updateMapDelayStrip() {
   document.getElementById('mapNormalCount').textContent  = total ? (total - delayed) + '편' : '—';
 }
 
-// 지도 초기화는 drawerNav에서 직접 처리
+// showPanel에 지도 초기화 훅
+const _origShowPanel = showPanel;
+showPanel = function(id, el) {
+  _origShowPanel(id, el);
+  if (id === 'airmap') {
+    setTimeout(() => initAirMap(), 100);
+  }
+};
 
 
 // ══════════════════════════════════════════════════════
@@ -2963,7 +2970,12 @@ function sendChat() {
   }, 1200);
 }
 
-// 채팅 초기화는 drawerNav에서 직접 처리
+// showPanel 훅에 채팅 초기화 추가
+const _origShowPanel2 = showPanel;
+showPanel = function(id, el) {
+  _origShowPanel2(id, el);
+  if (id === 'chat') initChat();
+};
 
 
 // ══════════════════════════════════════════════════════
@@ -3009,7 +3021,7 @@ function drawerNav(panelId, label, el) {
   if (panelId === 'map')      setTimeout(() => initMap(), 100);
   if (panelId === 'airmap')   setTimeout(() => initAirMap(), 100);
   if (panelId === 'chat')     initChat();
-  if (panelId === 'live')     fetchLiveData('arr');
+  if (panelId === 'live')     fetchLiveData('dep');
   if (panelId === 'arrivals') fetchArrivals();
 }
 
