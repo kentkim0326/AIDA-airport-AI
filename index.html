@@ -425,6 +425,104 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 .dis-lbl  { font-size:10px; color:#90CAF9; margin-top:2px; }
 
 
+
+/* ════════════════════════════════
+   SIDE DRAWER NAV
+   ════════════════════════════════ */
+.drawer-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  z-index:498; opacity:0; pointer-events:none;
+  transition:opacity .28s ease; backdrop-filter:blur(3px);
+}
+.drawer-overlay.show { opacity:1; pointer-events:all; }
+
+.drawer {
+  position:fixed; top:0; left:-300px; width:272px; height:100dvh;
+  background:#0A1628; z-index:499;
+  box-shadow:6px 0 32px rgba(0,0,0,.6);
+  transition:left .28s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.drawer.open { left:0; }
+[data-theme="dark"] .drawer { background:#020817; }
+
+.drawer-head {
+  padding:22px 20px 16px;
+  background:linear-gradient(135deg,#0D2137 0%,#1565C0 100%);
+  flex-shrink:0;
+}
+.drawer-logo { font-size:26px; font-weight:900; color:#fff; letter-spacing:-1px; }
+.drawer-logo span { color:#00B4D8; }
+.drawer-sub { font-size:11px; color:#7090B0; margin-top:4px; line-height:1.5; }
+.drawer-badge {
+  display:inline-block; margin-top:10px;
+  background:rgba(255,255,255,.1); color:#90CAF9;
+  font-size:10px; font-weight:700; padding:4px 12px;
+  border-radius:20px; border:1px solid rgba(255,255,255,.15);
+}
+
+.drawer-section {
+  padding:12px 16px 4px; font-size:10px; font-weight:700;
+  color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1.5px;
+}
+.drawer-item {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 14px; margin:2px 8px; border-radius:10px;
+  cursor:pointer; transition:all .15s;
+  color:rgba(255,255,255,.65); font-size:13px; font-weight:600;
+  border:1px solid transparent;
+}
+.drawer-item:hover { background:rgba(255,255,255,.09); color:#fff; }
+.drawer-item.active {
+  background:rgba(0,180,216,.14); color:#00B4D8;
+  border-color:rgba(0,180,216,.25);
+}
+.drawer-item .di-icon { font-size:19px; width:26px; text-align:center; flex-shrink:0; }
+.drawer-item .di-label { flex:1; }
+.drawer-item .di-badge {
+  font-size:9px; font-weight:800; background:#EF4444; color:#fff;
+  padding:2px 7px; border-radius:8px; flex-shrink:0;
+}
+.drawer-item .di-new {
+  font-size:9px; font-weight:700; background:#10B981; color:#fff;
+  padding:2px 7px; border-radius:8px; flex-shrink:0;
+}
+.drawer-divider { height:1px; background:rgba(255,255,255,.07); margin:6px 16px; }
+.drawer-footer {
+  margin-top:auto; padding:14px 18px;
+  border-top:1px solid rgba(255,255,255,.07);
+  font-size:10px; color:rgba(255,255,255,.3); line-height:1.7; flex-shrink:0;
+}
+
+/* 햄버거 */
+.hamburger {
+  width:36px; height:36px; border-radius:9px;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14);
+  cursor:pointer; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:5px;
+  flex-shrink:0; transition:background .2s; padding:0;
+}
+.hamburger:hover { background:rgba(255,255,255,.2); }
+.hamburger span {
+  display:block; width:18px; height:2px; background:#fff;
+  border-radius:2px; transition:all .28s ease;
+}
+.hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+/* 현재 탭명 */
+.nav-current {
+  flex:1; font-size:13px; font-weight:700;
+  color:rgba(255,255,255,.85); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; padding:0 4px;
+}
+
+@media(max-width:768px) {
+  .drawer { width:256px; }
+  .hbadge { display:none; }
+}
+
 /* ══════════════════════════════════════
    MOBILE RESPONSIVE — AIDA v3.5
    ══════════════════════════════════════ */
@@ -771,44 +869,16 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 </div>
 
 <div class="header">
+  <!-- 햄버거 버튼 -->
+  <button class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="메뉴">
+    <span></span><span></span><span></span>
+  </button>
+
   <!-- 로고 -->
-  <div style="flex-shrink:0">
-    <div class="logo">AI<span>DA</span> <span class="ver">v3</span> <span class="live-badge">● LIVE</span></div>
-  </div>
+  <div class="logo">AI<span>DA</span> <span class="ver">v3</span> <span class="live-badge">● LIVE</span></div>
 
-  <!-- 인라인 탭 (메인 4개) -->
-  <nav class="nav-tabs" id="navTabs">
-    <div class="ntab active" data-panel="sim"      onclick="showPanelNav('sim',this)">
-      <span class="ntab-icon">✈</span> 지연 시뮬레이터
-    </div>
-    <div class="ntab" data-panel="live"     onclick="showPanelNav('live',this)">
-      <span class="ntab-icon">📡</span> 운항현황
-    </div>
-    <div class="ntab" data-panel="arrivals" onclick="showPanelNav('arrivals',this)">
-      <span class="ntab-icon">🛬</span> 입국장
-    </div>
-    <div class="ntab" data-panel="ai"       onclick="showPanelNav('ai',this)">
-      <span class="ntab-icon">🤖</span> AI 메시지
-    </div>
-
-    <!-- More 드롭다운 -->
-    <div class="ntab-more">
-      <button class="ntab-more-btn" id="moreBtn" onclick="toggleMore(event)">
-        ⋯ 더보기 <span style="font-size:9px;opacity:.7">▾</span>
-      </button>
-      <div class="ntab-dropdown" id="moreDropdown">
-        <div class="ntab-dropdown-item" data-panel="map"    onclick="showPanelNav('map',this)">
-          <span class="di-icon">📦</span> 수하물 실시간 맵
-        </div>
-        <div class="ntab-dropdown-item" data-panel="airmap" onclick="showPanelNav('airmap',this)">
-          <span class="di-icon">🗺</span> 공항 주변 지도
-        </div>
-        <div class="ntab-dropdown-item" data-panel="chat"   onclick="showPanelNav('chat',this)">
-          <span class="di-icon">💬</span> 여행자 채팅방
-        </div>
-      </div>
-    </div>
-  </nav>
+  <!-- 현재 탭 이름 -->
+  <div class="nav-current" id="navCurrent">✈ 지연 시뮬레이터</div>
 
   <!-- 우측 컨트롤 -->
   <div class="nav-controls">
@@ -820,6 +890,67 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
     </select>
     <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="다크/라이트 모드"></button>
     <div class="hbadge">🏆 최우수상</div>
+  </div>
+</div>
+
+<!-- 오버레이 -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- 사이드 드로어 -->
+<div class="drawer" id="drawer">
+  <!-- 드로어 헤더 -->
+  <div class="drawer-head">
+    <div class="drawer-logo">AI<span>DA</span></div>
+    <div class="drawer-sub">AI Delay Assistant<br>인천공항 AI-PORT 공모전</div>
+    <div class="drawer-badge">🏆 최우수상 수상작</div>
+  </div>
+
+  <!-- 메인 메뉴 -->
+  <div class="drawer-section">메인</div>
+  <div class="drawer-item active" data-panel="sim" onclick="drawerNav('sim', '✈ 지연 시뮬레이터', this)">
+    <span class="di-icon">✈️</span>
+    <span class="di-label">지연 시뮬레이터</span>
+  </div>
+  <div class="drawer-item" data-panel="live" onclick="drawerNav('live', '📡 실시간 운항현황', this)">
+    <span class="di-icon">📡</span>
+    <span class="di-label">실시간 운항현황</span>
+    <span class="di-badge">LIVE</span>
+  </div>
+  <div class="drawer-item" data-panel="arrivals" onclick="drawerNav('arrivals', '🛬 입국장 혼잡도', this)">
+    <span class="di-icon">🛬</span>
+    <span class="di-label">입국장 혼잡도</span>
+  </div>
+  <div class="drawer-item" data-panel="ai" onclick="drawerNav('ai', '🤖 AI 메시지 생성', this)">
+    <span class="di-icon">🤖</span>
+    <span class="di-label">AI 메시지 생성</span>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <!-- 부가 메뉴 -->
+  <div class="drawer-section">부가 서비스</div>
+  <div class="drawer-item" data-panel="map" onclick="drawerNav('map', '📦 수하물 실시간 맵', this)">
+    <span class="di-icon">📦</span>
+    <span class="di-label">수하물 실시간 맵</span>
+  </div>
+  <div class="drawer-item" data-panel="airmap" onclick="drawerNav('airmap', '🗺 공항 주변 지도', this)">
+    <span class="di-icon">🗺️</span>
+    <span class="di-label">공항 주변 지도</span>
+    <span class="di-new">NEW</span>
+  </div>
+  <div class="drawer-item" data-panel="chat" onclick="drawerNav('chat', '💬 여행자 채팅방', this)">
+    <span class="di-icon">💬</span>
+    <span class="di-label">여행자 채팅방</span>
+    <span class="di-new">20개국</span>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <!-- 하단 정보 -->
+  <div class="drawer-footer">
+    공공데이터: 인천국제공항공사<br>
+    Powered by Claude AI (Anthropic)<br>
+    <span style="color:var(--cyan)">aida-airport-ai.vercel.app</span>
   </div>
 </div>
 
@@ -1848,28 +1979,27 @@ const UI_STRINGS = {
 function setUILang(lang){
   const s = UI_STRINGS[lang] || UI_STRINGS.ko;
 
-  // ── 네비 탭 텍스트 업데이트 (ntab 4개 + dropdown 3개 = 7개) ──
-  const NAV_LABELS = [
-    { sel:'[data-panel="sim"]',      text: s.tabs[0] },
-    { sel:'[data-panel="live"]',     text: s.tabs[1] },
-    { sel:'[data-panel="arrivals"]', text: s.tabs[2] },
-    { sel:'[data-panel="ai"]',       text: s.tabs[4] },
-    { sel:'[data-panel="map"]',      text: s.tabs[3] },
-    { sel:'[data-panel="airmap"]',   text: s.tabs[5] },
-    { sel:'[data-panel="chat"]',     text: s.tabs[6] },
+  // ── 드로어 메뉴 텍스트 업데이트 ──
+  const DRAWER_MAP = [
+    { panel:'sim',      labelIdx:0 },
+    { panel:'live',     labelIdx:1 },
+    { panel:'arrivals', labelIdx:2 },
+    { panel:'map',      labelIdx:3 },
+    { panel:'ai',       labelIdx:4 },
+    { panel:'airmap',   labelIdx:5 },
+    { panel:'chat',     labelIdx:6 },
   ];
-  NAV_LABELS.forEach(({sel, text}) => {
-    const el = document.querySelector(sel);
-    if (!el || !text) return;
-    // ntab은 아이콘 span 보존, dropdown-item은 di-icon span 보존
-    const iconEl = el.querySelector('.ntab-icon, .di-icon');
-    if (iconEl) {
-      const iconHtml = iconEl.outerHTML;
-      el.innerHTML = iconHtml + ' ' + text;
-    } else {
-      el.textContent = text;
-    }
+  DRAWER_MAP.forEach(({panel, labelIdx}) => {
+    const el = document.querySelector(`.drawer-item[data-panel="${panel}"] .di-label`);
+    if (el && s.tabs[labelIdx]) el.textContent = s.tabs[labelIdx];
   });
+  // 현재 활성 탭 이름도 업데이트
+  const activeItem = document.querySelector('.drawer-item.active');
+  if (activeItem) {
+    const cur = document.getElementById('navCurrent');
+    const lbl = activeItem.querySelector('.di-label');
+    if (cur && lbl) cur.textContent = lbl.textContent;
+  }
 
   // ── 버튼들 ──
   const simBtn = document.getElementById('simBtn');
@@ -2828,49 +2958,56 @@ showPanel = function(id, el) {
 };
 
 
-// ══ 네비바 탭 제어 ══
-function showPanelNav(id, el) {
-  // 모든 ntab / dropdown-item 비활성화
-  document.querySelectorAll('.ntab, .ntab-dropdown-item').forEach(t => {
-    t.classList.remove('active');
-  });
-  // more 버튼 has-active 제거
-  document.getElementById('moreBtn').classList.remove('has-active');
+// ══════════════════════════════════════════════════════
+// 사이드 드로어 네비게이션
+// ══════════════════════════════════════════════════════
+function toggleDrawer() {
+  const drawer   = document.getElementById('drawer');
+  const overlay  = document.getElementById('drawerOverlay');
+  const burger   = document.getElementById('hamburger');
+  const isOpen   = drawer.classList.contains('open');
+  if (isOpen) closeDrawer();
+  else {
+    drawer.classList.add('open');
+    overlay.classList.add('show');
+    burger.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
 
-  // 클릭된 항목 활성화
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('show');
+  document.getElementById('hamburger').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function drawerNav(panelId, label, el) {
+  // 패널 전환
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+
+  // 드로어 활성 표시
+  document.querySelectorAll('.drawer-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
 
-  // dropdown 항목이면 more 버튼에 has-active 표시
-  if (el.classList.contains('ntab-dropdown-item')) {
-    document.getElementById('moreBtn').classList.add('has-active');
-    // dropdown 닫기
-    document.getElementById('moreBtn').classList.remove('open');
-  }
+  // 헤더 현재 탭 이름 업데이트
+  document.getElementById('navCurrent').textContent = label;
 
-  // 패널 전환 (기존 showPanel 재사용)
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
+  // 드로어 닫기
+  closeDrawer();
 
   // 패널별 초기화
-  if (id === 'map')    initMap();
-  if (id === 'airmap') setTimeout(() => initAirMap(), 100);
-  if (id === 'chat')   initChat();
-  if (id === 'live')   fetchLiveData('dep');
-  if (id === 'arrivals') fetchArrivals();
+  if (panelId === 'map')      setTimeout(() => initMap(), 100);
+  if (panelId === 'airmap')   setTimeout(() => initAirMap(), 100);
+  if (panelId === 'chat')     initChat();
+  if (panelId === 'live')     fetchLiveData('dep');
+  if (panelId === 'arrivals') fetchArrivals();
 }
 
-function toggleMore(e) {
-  e.stopPropagation();
-  document.getElementById('moreBtn').classList.toggle('open');
-}
-
-// 외부 클릭 시 드롭다운 닫기
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.ntab-more')) {
-    document.getElementById('moreBtn').classList.remove('open');
-  }
+// ESC 키로 드로어 닫기
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDrawer();
 });
 
-</script>
-</body>
-</html>
+
