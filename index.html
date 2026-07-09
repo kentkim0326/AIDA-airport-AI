@@ -205,9 +205,168 @@ select:focus,input:focus{border-color:var(--blue);background:#fff;}
           border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite;}
 
 footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-top:8px;}
+
+/* ── Flight Picker Modal ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  animation:fadeIn .2s ease;
+}
+.modal-overlay.hide { animation:fadeOut .2s ease forwards; }
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+@keyframes fadeOut { from{opacity:1} to{opacity:0} }
+
+.modal-box {
+  background:#fff; border-radius:20px; width:min(760px,96vw);
+  max-height:88vh; display:flex; flex-direction:column;
+  box-shadow:0 24px 60px rgba(0,0,0,.35);
+  animation:slideUp .25s ease;
+  overflow:hidden;
+}
+[data-theme="dark"] .modal-box { background:#1E293B; color:#E2E8F0; }
+@keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.modal-head {
+  background:var(--navy); color:#fff; padding:20px 24px;
+  display:flex; align-items:center; gap:12px; flex-shrink:0;
+}
+.modal-head .mlogo { font-size:22px; font-weight:900; }
+.modal-head .mlogo span { color:var(--cyan); }
+.modal-head .msub { font-size:11px; color:#7090B0; margin-top:2px; }
+.modal-close {
+  margin-left:auto; background:rgba(255,255,255,.12); border:none;
+  color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer;
+  font-size:16px; display:flex; align-items:center; justify-content:center;
+  transition:background .15s;
+}
+.modal-close:hover { background:rgba(255,255,255,.25); }
+
+.modal-search {
+  padding:14px 20px; border-bottom:1px solid var(--light); flex-shrink:0;
+  display:flex; gap:10px; align-items:center;
+}
+.modal-search input {
+  flex:1; padding:9px 14px; border:1.5px solid var(--light);
+  border-radius:10px; font-size:13px; background:var(--off); outline:none;
+}
+.modal-search input:focus { border-color:var(--blue); background:#fff; }
+[data-theme="dark"] .modal-search input { background:#0F172A; color:#E2E8F0; }
+.modal-filter-row {
+  display:flex; gap:6px; flex-wrap:wrap;
+  padding:10px 20px; border-bottom:1px solid var(--light); flex-shrink:0;
+}
+.mfbtn {
+  padding:4px 12px; border-radius:20px; border:1.5px solid var(--light);
+  font-size:11px; font-weight:600; cursor:pointer; background:#fff;
+  color:var(--gray); transition:all .15s;
+}
+.mfbtn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+[data-theme="dark"] .mfbtn { background:#0F172A; color:#94A3B8; }
+[data-theme="dark"] .mfbtn.active { background:var(--blue); color:#fff; }
+
+.modal-body { overflow-y:auto; flex:1; padding:12px 16px; }
+
+.flight-card {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; border-radius:12px;
+  border:1.5px solid var(--light); margin-bottom:8px;
+  cursor:pointer; transition:all .18s; background:#fff;
+}
+[data-theme="dark"] .flight-card { background:#0F172A; border-color:#334155; }
+.flight-card:hover { border-color:var(--blue); background:#EFF6FF; transform:translateX(3px); }
+[data-theme="dark"] .flight-card:hover { background:#1E3A5F; border-color:var(--blue); }
+.flight-card.delayed { border-left:4px solid var(--red); }
+.flight-card.boarding { border-left:4px solid var(--green); }
+.flight-card.normal { border-left:4px solid var(--light); }
+
+.fc-airline { font-size:18px; flex-shrink:0; }
+.fc-info { flex:1; min-width:0; }
+.fc-flightno { font-size:14px; font-weight:800; color:var(--navy); }
+[data-theme="dark"] .fc-flightno { color:#E2E8F0; }
+.fc-route { font-size:11px; color:var(--gray); margin-top:1px; }
+.fc-times { text-align:right; flex-shrink:0; }
+.fc-sched { font-size:13px; font-weight:700; color:var(--navy); }
+[data-theme="dark"] .fc-sched { color:#E2E8F0; }
+.fc-delay { font-size:11px; color:var(--red); font-weight:700; margin-top:2px; }
+.fc-ok { font-size:11px; color:var(--green); font-weight:600; margin-top:2px; }
+.fc-badge {
+  font-size:10px; font-weight:700; padding:3px 9px; border-radius:20px;
+  flex-shrink:0; white-space:nowrap;
+}
+.fc-badge.delayed { background:#FEE2E2; color:var(--red); }
+.fc-badge.boarding { background:#D1FAE5; color:var(--green); }
+.fc-badge.normal { background:#EFF6FF; color:var(--blue); }
+.fc-badge.gate { background:#EDE9FE; color:var(--purple); }
+
+.modal-stats {
+  display:flex; gap:8px; padding:10px 20px; background:var(--off);
+  border-top:1px solid var(--light); flex-shrink:0; font-size:11px;
+}
+[data-theme="dark"] .modal-stats { background:#0F172A; border-top-color:#334155; }
+.ms-item { display:flex; align-items:center; gap:5px; }
+.ms-dot { width:8px; height:8px; border-radius:50%; }
+.modal-loading {
+  text-align:center; padding:40px 20px; color:var(--gray);
+}
+.modal-loading .big-spinner {
+  width:36px; height:36px; border:3px solid var(--light);
+  border-top-color:var(--blue); border-radius:50%;
+  animation:spin .8s linear infinite; margin:0 auto 14px;
+}
+
 </style>
 </head>
 <body>
+
+
+<!-- ══ Flight Picker Modal ══ -->
+<div class="modal-overlay" id="flightModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="mlogo">AI<span>DA</span> v3</div>
+        <div class="msub">오늘의 인천공항 출발편 — 항공편을 선택하면 시뮬레이터에 바로 연동됩니다</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-search">
+      <input type="text" id="modalSearch" placeholder="🔍 편명·항공사·목적지 검색..."
+        oninput="renderModalFlights()">
+      <select id="modalAirline" onchange="renderModalFlights()"
+        style="padding:9px 10px;border:1.5px solid var(--light);border-radius:10px;font-size:12px;background:var(--off);outline:none">
+        <option value="">전체 항공사</option>
+        <option value="KE">대한항공</option>
+        <option value="OZ">아시아나</option>
+        <option value="7C">제주항공</option>
+        <option value="LJ">진에어</option>
+        <option value="TW">티웨이</option>
+      </select>
+    </div>
+
+    <div class="modal-filter-row">
+      <button class="mfbtn active" id="mf-all"     onclick="setModalFilter('all',this)">전체</button>
+      <button class="mfbtn"        id="mf-delayed" onclick="setModalFilter('delayed',this)">⚠️ 지연</button>
+      <button class="mfbtn"        id="mf-normal"  onclick="setModalFilter('normal',this)">✅ 정상</button>
+      <button class="mfbtn"        id="mf-boarding"onclick="setModalFilter('boarding',this)">🚪 탑승중</button>
+    </div>
+
+    <div class="modal-body" id="modalBody">
+      <div class="modal-loading">
+        <div class="big-spinner"></div>
+        공공데이터 API에서 오늘의 항공편을 불러오는 중...<br>
+        <span style="font-size:11px;color:var(--gray);margin-top:6px;display:block">인천국제공항공사 실시간 데이터</span>
+      </div>
+    </div>
+
+    <div class="modal-stats" id="modalStats" style="display:none">
+      <div class="ms-item"><div class="ms-dot" style="background:var(--blue)"></div><span id="msTotalText">—</span></div>
+      <div class="ms-item"><div class="ms-dot" style="background:var(--red)"></div><span id="msDelayText">—</span></div>
+      <div class="ms-item"><div class="ms-dot" style="background:var(--green)"></div><span id="msBoardText">—</span></div>
+      <div style="margin-left:auto;color:var(--gray)" id="msUpdate">—</div>
+    </div>
+  </div>
+</div>
 
 <div class="header">
   <div>
@@ -1192,6 +1351,164 @@ function setUILang(lang){
   if(sel) sel.value=saved;
   setUILang(saved);
 })();
+
+
+// ══════════════════════════════════════════════════════
+// FLIGHT PICKER MODAL
+// ══════════════════════════════════════════════════════
+let modalFlights = [];
+let modalFilter  = 'all';
+
+const AIRLINE_EMOJI = {KE:'🇰🇷',OZ:'🇰🇷','7C':'🟠',LJ:'🔵',TW:'🟢',BX:'🔴',MU:'🇨🇳',CA:'🇨🇳',CZ:'🇨🇳',NH:'🇯🇵',JL:'🇯🇵',SQ:'🇸🇬',TG:'🇹🇭',EK:'🇦🇪',QR:'🇶🇦',UA:'🇺🇸',DL:'🇺🇸'};
+
+function getAirlineEmoji(flightId) {
+  const code = (flightId||'').slice(0,2).toUpperCase();
+  return AIRLINE_EMOJI[code] || '✈️';
+}
+
+function getFlightStatus(f) {
+  const s = (f.status||'').trim();
+  if (s.includes('지연') || s.includes('Delay')) return 'delayed';
+  if (s.includes('탑승') || s.includes('Board')) return 'boarding';
+  if (s.includes('게이트') || s.includes('Gate')) return 'gate';
+  return 'normal';
+}
+
+function setModalFilter(type, el) {
+  modalFilter = type;
+  document.querySelectorAll('.mfbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderModalFlights();
+}
+
+function renderModalFlights() {
+  const q     = (document.getElementById('modalSearch').value||'').toLowerCase();
+  const al    = (document.getElementById('modalAirline').value||'');
+  const body  = document.getElementById('modalBody');
+
+  let list = modalFlights.filter(f => {
+    const status = getFlightStatus(f);
+    if (modalFilter === 'delayed'  && status !== 'delayed')  return false;
+    if (modalFilter === 'normal'   && status !== 'normal')   return false;
+    if (modalFilter === 'boarding' && status !== 'boarding' && status !== 'gate') return false;
+    if (al && !(f.flightId||'').startsWith(al)) return false;
+    if (q) {
+      const hay = ((f.flightId||'')+(f.airline||'')+(f.dest||'')+(f.status||'')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (!list.length) {
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray)">검색 결과가 없습니다</div>';
+    return;
+  }
+
+  body.innerHTML = list.map(f => {
+    const status  = getFlightStatus(f);
+    const emoji   = getAirlineEmoji(f.flightId);
+    const isDelay = status === 'delayed';
+    const delayMatch = (f.status||'').match(/(\d+)분/);
+    const delayMin = delayMatch ? delayMatch[1] : '45';
+    const badgeClass = status === 'gate' ? 'gate' : status;
+    const badgeText  = status === 'delayed' ? `⚠ ${f.status}` : status === 'boarding' ? '탑승중 🚪' : status === 'gate' ? '게이트오픈' : '정상 ✅';
+
+    return `<div class="flight-card ${status}" onclick="pickFlight('${f.flightId}','${f.dest||''}','${f.schedTime||''}','${delayMin}','${f.gate||'-'}','${f.terminal||''}','${(f.status||'정상').replace(/'/g,'')}')">
+      <div class="fc-airline">${emoji}</div>
+      <div class="fc-info">
+        <div class="fc-flightno">${f.flightId||'-'} <span style="font-size:11px;font-weight:400;color:var(--gray)">${f.airline||''}</span></div>
+        <div class="fc-route">ICN → ${f.dest||'-'} &nbsp;|&nbsp; 탑승구 ${f.gate||'-'} &nbsp;|&nbsp; ${f.terminal||'-'}</div>
+      </div>
+      <div class="fc-times">
+        <div class="fc-sched">${f.schedTime||'-'}</div>
+        ${isDelay ? `<div class="fc-delay">→ ${f.chgTime}</div>` : `<div class="fc-ok">정시</div>`}
+      </div>
+      <div class="fc-badge ${badgeClass}">${badgeText}</div>
+    </div>`;
+  }).join('');
+}
+
+function pickFlight(flightId, dest, schedTime, delayMin, gate, terminal, status) {
+  // 시뮬레이터에 값 주입
+  const fn = document.getElementById('flightNo');
+  const dm = document.getElementById('delayMin');
+  if (fn) fn.value = flightId;
+  if (dm) dm.value = parseInt(delayMin) || 0;
+
+  // 항공사 코드 추출해서 셀렉트 맞추기
+  const airlineCode = flightId.slice(0,2).toUpperCase();
+  const alSel = document.getElementById('airline');
+  if (alSel) {
+    for (let opt of alSel.options) {
+      if (opt.value === airlineCode) { alSel.value = airlineCode; break; }
+    }
+  }
+
+  closeModal();
+
+  // 시뮬레이터 탭으로 이동
+  showPanel('sim', document.querySelectorAll('.mtab')[0]);
+
+  // 자동 실행 (지연편만)
+  if (parseInt(delayMin) > 0) {
+    setTimeout(() => runSim(), 400);
+  }
+}
+
+function closeModal() {
+  const m = document.getElementById('flightModal');
+  m.classList.add('hide');
+  setTimeout(() => m.style.display = 'none', 200);
+}
+
+async function loadModalFlights() {
+  try {
+    const url = `https://apis.data.go.kr/B551177/StatusOfArrivals/getArrivalsCongestion?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&numOfRows=3&pageNo=1&type=json`;
+    // 출발편 API 시도
+    const depUrl = `https://apis.data.go.kr/B551177/StatusOfPassengerFlightsOdp/getPassengerDeparturesDailyList?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&from_time=0000&to_time=2400&lang=K&type=json&airport=ICN&numOfRows=50`;
+    const res = await fetch(depUrl);
+    const data = await res.json();
+    if (data?.response?.body?.items) {
+      const raw = data.response.body.items.item || [];
+      const items = Array.isArray(raw) ? raw : [raw];
+      modalFlights = items.map(item => ({
+        flightId: item.flightId || '-',
+        airline: item.airlineKorean || item.airline || '-',
+        dest: item.airport || '-',
+        schedTime: (item.scheduleDateTime||'').slice(8,12).replace(/(\d{2})(\d{2})/,'$1:$2'),
+        chgTime: (item.estimatedDateTime||item.scheduleDateTime||'').slice(8,12).replace(/(\d{2})(\d{2})/,'$1:$2'),
+        gate: item.gate || '-',
+        status: item.remark || '정상',
+        terminal: item.terminalId === 'P01' ? 'T1' : 'T2',
+      }));
+    } else throw new Error('no data');
+  } catch(e) {
+    // 샘플 데이터 fallback
+    modalFlights = [...SAMPLE_FLIGHTS];
+  }
+
+  // 통계 업데이트
+  const total   = modalFlights.length;
+  const delayed = modalFlights.filter(f => getFlightStatus(f) === 'delayed').length;
+  const board   = modalFlights.filter(f => getFlightStatus(f) === 'boarding' || getFlightStatus(f) === 'gate').length;
+  document.getElementById('msTotalText').textContent = `총 ${total}편`;
+  document.getElementById('msDelayText').textContent = `지연 ${delayed}편`;
+  document.getElementById('msBoardText').textContent = `탑승중 ${board}편`;
+  document.getElementById('msUpdate').textContent    = '갱신: ' + new Date().toLocaleTimeString('ko-KR');
+  document.getElementById('modalStats').style.display = 'flex';
+
+  renderModalFlights();
+}
+
+// 앱 시작 시 모달 표시
+window.addEventListener('DOMContentLoaded', () => {
+  loadModalFlights();
+});
+
+// ESC 키로 닫기
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
 
 </script>
 </body>
