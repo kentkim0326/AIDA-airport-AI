@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIDA v3 — AI Delay Assistant</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <style>
 :root {
   --navy:#0A1628; --blue:#1565C0; --sky:#1E88E5; --cyan:#00B4D8;
@@ -314,6 +316,44 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   animation:spin .8s linear infinite; margin:0 auto 14px;
 }
 
+
+/* ── Airport Map Tab ── */
+#maplibre-container { width:100%; height:520px; border-radius:14px; overflow:hidden; }
+.map-sidebar { display:flex; flex-direction:column; gap:0; max-height:520px; overflow-y:auto; }
+.hotel-card {
+  padding:13px 14px; border-bottom:1px solid var(--light); cursor:pointer;
+  transition:background .15s; display:flex; gap:10px; align-items:flex-start;
+}
+.hotel-card:hover { background:var(--off); }
+.hotel-card.active { background:#EFF6FF; border-left:3px solid var(--blue); }
+[data-theme="dark"] .hotel-card:hover { background:#0F172A; }
+[data-theme="dark"] .hotel-card.active { background:#1E3A5F; }
+.hotel-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+.hotel-name { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:2px; }
+[data-theme="dark"] .hotel-name { color:#E2E8F0; }
+.hotel-dist { font-size:11px; color:var(--gray); }
+.hotel-stars { color:#F59E0B; font-size:11px; }
+.hotel-price { font-size:11px; font-weight:700; color:var(--blue); margin-top:3px; }
+.map-filter-bar {
+  display:flex; gap:6px; flex-wrap:wrap; padding:12px 14px;
+  border-bottom:1px solid var(--light); background:var(--off);
+}
+[data-theme="dark"] .map-filter-bar { background:#0F172A; }
+.mfilt { padding:5px 13px; border-radius:20px; border:1.5px solid var(--light);
+  font-size:11px; font-weight:600; cursor:pointer; background:#fff; color:var(--gray); transition:all .15s; }
+.mfilt.on { background:var(--blue); color:#fff; border-color:var(--blue); }
+[data-theme="dark"] .mfilt { background:#1E293B; color:#94A3B8; }
+.map-popup-title { font-weight:700; font-size:13px; margin-bottom:4px; }
+.map-popup-meta  { font-size:11px; color:#555; line-height:1.6; }
+.delay-info-strip {
+  background:linear-gradient(135deg,#0A1628,#1565C0); color:#fff;
+  border-radius:12px; padding:14px 18px; margin-bottom:14px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.dis-item { text-align:center; }
+.dis-val  { font-size:20px; font-weight:800; }
+.dis-lbl  { font-size:10px; color:#90CAF9; margin-top:2px; }
+
 </style>
 </head>
 <body>
@@ -391,6 +431,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   <div class="mtab" onclick="showPanel('arrivals',this)">🛬 입국장 혼잡도</div>
   <div class="mtab" onclick="showPanel('map',this)">📦 수하물 실시간 맵</div>
   <div class="mtab" onclick="showPanel('ai',this)">🤖 AI 메시지 생성</div>
+  <div class="mtab" onclick="showPanel('airmap',this)">🗺 공항 주변 지도</div>
 </div>
 
 <!-- ══════════════ PANEL 1: 시뮬레이터 ══════════════ -->
@@ -734,6 +775,54 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
       </div>
       <div class="msgbox typing" id="aiResult">버튼을 누르면 AI가 메시지를 생성합니다.</div>
     </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ PANEL 6: 공항 주변 지도 ══════════════ -->
+<div class="panel" id="panel-airmap">
+  <div style="max-width:1200px;margin:0 auto;">
+
+    <!-- 지연 요약 스트립 -->
+    <div class="delay-info-strip" id="mapDelayStrip">
+      <div style="font-size:22px">✈️</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">인천국제공항 (ICN) — 실시간 현황</div>
+        <div style="font-size:11px;color:#90CAF9">지연 발생 시 근처 호텔 즉시 안내 · 셔틀 정보 포함</div>
+      </div>
+      <div class="dis-item"><div class="dis-val" id="mapTotalFlights">—</div><div class="dis-lbl">오늘 편수</div></div>
+      <div class="dis-item"><div class="dis-val" style="color:#F87171" id="mapDelayCount">—</div><div class="dis-lbl">지연편</div></div>
+      <div class="dis-item"><div class="dis-val" style="color:#34D399" id="mapNormalCount">—</div><div class="dis-lbl">정상편</div></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <!-- 필터 바 -->
+      <div class="map-filter-bar">
+        <button class="mfilt on"  id="mf-hotel"   onclick="toggleMapLayer('hotel',this)">🏨 호텔</button>
+        <button class="mfilt on"  id="mf-transit" onclick="toggleMapLayer('transit',this)">🚌 교통</button>
+        <button class="mfilt on"  id="mf-food"    onclick="toggleMapLayer('food',this)">🍽 식당</button>
+        <button class="mfilt"     id="mf-lounge"  onclick="toggleMapLayer('lounge',this)">💺 라운지</button>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <button onclick="flyToAirport()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:5px 13px;font-size:11px;font-weight:700;cursor:pointer">🎯 공항 중심</button>
+          <button onclick="flyToT1()" style="background:var(--off);border:1px solid var(--light);border-radius:8px;padding:5px 13px;font-size:11px;font-weight:600;cursor:pointer">T1</button>
+          <button onclick="flyToT2()" style="background:var(--off);border:1px solid var(--light);border-radius:8px;padding:5px 13px;font-size:11px;font-weight:600;cursor:pointer">T2</button>
+        </div>
+      </div>
+
+      <!-- 지도 + 사이드바 -->
+      <div style="display:grid;grid-template-columns:1fr 300px;height:520px;">
+        <div id="maplibre-container"></div>
+        <div style="border-left:1px solid var(--light);display:flex;flex-direction:column;">
+          <div style="padding:12px 14px;font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--light);flex-shrink:0">
+            📍 주변 시설 목록
+          </div>
+          <div class="map-sidebar" id="mapSidebar">
+            <div style="padding:20px;text-align:center;color:var(--gray);font-size:12px">지도 로딩 중...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1273,7 +1362,7 @@ function toggleDark(){
 // ══════════════════════════════════════════════════════
 const UI_STRINGS = {
   ko: {
-    tabs:['✈ 지연 시뮬레이터','📡 실시간 운항현황','🛬 입국장 혼잡도','📦 수하물 실시간 맵','🤖 AI 메시지 생성'],
+    tabs:['✈ 지연 시뮬레이터','📡 실시간 운항현황','🛬 입국장 혼잡도','📦 수하물 실시간 맵','🤖 AI 메시지 생성','🗺 공항 주변 지도'],
     simBtn:'AIDA 시뮬레이션 실행', simReset:'✓ 다시 실행',
     liveBtn:'🔄 실시간 데이터 불러오기', arrBtn:'🔄 혼잡도 불러오기',
     flightLabel:'항공편 번호', airlineLabel:'항공사', routeLabel:'노선',
@@ -1284,7 +1373,7 @@ const UI_STRINGS = {
     logoSub:'AI Delay Assistant — 공공데이터 실시간 연동 · Claude AI · 입국장 혼잡도',
   },
   en: {
-    tabs:['✈ Delay Simulator','📡 Live Flights','🛬 Arrivals Congestion','📦 Baggage Map','🤖 AI Message'],
+    tabs:['✈ Delay Simulator','📡 Live Flights','🛬 Arrivals Congestion','📦 Baggage Map','🤖 AI Message','🗺 Airport Map'],
     simBtn:'Run AIDA Simulation', simReset:'✓ Run Again',
     liveBtn:'🔄 Load Live Data', arrBtn:'🔄 Load Congestion',
     flightLabel:'Flight No.', airlineLabel:'Airline', routeLabel:'Route',
@@ -1295,7 +1384,7 @@ const UI_STRINGS = {
     logoSub:'AI Delay Assistant — Live Open Data · Claude AI · Arrivals Congestion',
   },
   zh: {
-    tabs:['✈ 延误模拟器','📡 实时航班','🛬 入境大厅拥挤度','📦 行李实时地图','🤖 AI消息生成'],
+    tabs:['✈ 延误模拟器','📡 实时航班','🛬 入境大厅拥挤度','📦 行李实时地图','🤖 AI消息生成','🗺 机场周边地图'],
     simBtn:'运行AIDA模拟', simReset:'✓ 重新运行',
     liveBtn:'🔄 加载实时数据', arrBtn:'🔄 加载拥挤度',
     flightLabel:'航班号', airlineLabel:'航空公司', routeLabel:'航线',
@@ -1306,7 +1395,7 @@ const UI_STRINGS = {
     logoSub:'AI延误助手 — 实时公共数据 · Claude AI · 入境拥挤度',
   },
   ja: {
-    tabs:['✈ 遅延シミュレーター','📡 リアルタイム運航','🛬 入国混雑状況','📦 手荷物マップ','🤖 AIメッセージ'],
+    tabs:['✈ 遅延シミュレーター','📡 リアルタイム運航','🛬 入国混雑状況','📦 手荷物マップ','🤖 AIメッセージ','🗺 空港周辺マップ'],
     simBtn:'AIDAシミュレーション実行', simReset:'✓ 再実行',
     liveBtn:'🔄 リアルタイムデータ取得', arrBtn:'🔄 混雑状況取得',
     flightLabel:'便名', airlineLabel:'航空会社', routeLabel:'路線',
@@ -1602,6 +1691,243 @@ window.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
 });
+
+
+// ══════════════════════════════════════════════════════
+// 공항 주변 지도 (MapLibre GL)
+// ══════════════════════════════════════════════════════
+let airMap = null;
+let mapLayers = { hotel:true, transit:true, food:true, lounge:false };
+let activeMarkerId = null;
+const mapMarkers = [];
+
+// 인천공항 좌표
+const ICN = [126.4407, 37.4602];
+const ICN_T1 = [126.4506, 37.4489];
+const ICN_T2 = [126.4150, 37.4726];
+
+// 시설 데이터
+const MAP_POIS = [
+  // ─ 호텔 ─
+  { id:'h1', type:'hotel', name:'그랜드 하얏트 인천', icon:'🏨', stars:'★★★★★',
+    price:'₩280,000~', dist:'공항 셔틀 10분', shuttle:true,
+    lng:126.6466, lat:37.4522, desc:'송도 국제도시 위치. 24시간 공항 셔틀 운행.' },
+  { id:'h2', type:'hotel', name:'파라다이스 시티', icon:'🏨', stars:'★★★★★',
+    price:'₩350,000~', dist:'공항 직결 5분', shuttle:true,
+    lng:126.4850, lat:37.4905, desc:'공항에서 가장 가까운 럭셔리 리조트. 카지노·스파 포함.' },
+  { id:'h3', type:'hotel', name:'네스트 호텔', icon:'🏨', stars:'★★★★',
+    price:'₩120,000~', dist:'공항 셔틀 15분', shuttle:true,
+    lng:126.4932, lat:37.4741, desc:'영종도 위치. 조용한 환경과 합리적 가격.' },
+  { id:'h4', type:'hotel', name:'인천공항 캡슐호텔', icon:'🛌', stars:'★★★',
+    price:'₩60,000~', dist:'T1 내부', shuttle:false,
+    lng:126.4506, lat:37.4480, desc:'T1 내부 위치. 단기 숙박 최적. 6시간/12시간 이용 가능.' },
+  { id:'h5', type:'hotel', name:'홀리데이 인 인천 송도', icon:'🏨', stars:'★★★★',
+    price:'₩150,000~', dist:'공항 셔틀 20분', shuttle:true,
+    lng:126.6270, lat:37.3985, desc:'송도컨벤시아 인근. 비즈니스 출장객 선호.' },
+  { id:'h6', type:'hotel', name:'베스트웨스턴 영종도', icon:'🏨', stars:'★★★',
+    price:'₩90,000~', dist:'공항 셔틀 12분', shuttle:true,
+    lng:126.5150, lat:37.4610, desc:'영종도 중심가 위치. 깔끔하고 가성비 우수.' },
+
+  // ─ 교통 ─
+  { id:'t1', type:'transit', name:'인천공항 T1 AREX 역', icon:'🚄', stars:'',
+    price:'서울역 43분', dist:'T1 지하 1층', shuttle:false,
+    lng:126.4506, lat:37.4475, desc:'공항철도(AREX) 직통 서울역까지 43분. 일반 56분.' },
+  { id:'t2', type:'transit', name:'인천공항 T2 AREX 역', icon:'🚄', stars:'',
+    price:'서울역 51분', dist:'T2 지하 1층', shuttle:false,
+    lng:126.4150, lat:37.4710, desc:'공항철도(AREX) T2 정차역. 2018년 개통.' },
+  { id:'t3', type:'transit', name:'공항버스 승강장 (T1)', icon:'🚌', stars:'',
+    price:'서울 시내 7,000~', dist:'T1 1층', shuttle:false,
+    lng:126.4510, lat:37.4495, desc:'서울·수도권 전역 리무진 버스. 24시간 운행.' },
+  { id:'t4', type:'transit', name:'인천공항 택시 승강장', icon:'🚕', stars:'',
+    price:'서울 약 65,000원', dist:'T1·T2 1층', shuttle:false,
+    lng:126.4502, lat:37.4500, desc:'일반/모범/대형 택시. 심야 할증 있음.' },
+
+  // ─ 식당 ─
+  { id:'f1', type:'food', name:'T1 면세구역 푸드코트', icon:'🍜', stars:'',
+    price:'₩10,000~20,000', dist:'T1 면세구역 3층', shuttle:false,
+    lng:126.4515, lat:37.4488, desc:'한식·중식·일식·양식. 면세 통과 후 이용 가능.' },
+  { id:'f2', type:'food', name:'T2 푸드가든', icon:'🍽', stars:'',
+    price:'₩12,000~25,000', dist:'T2 3층 출국장', shuttle:false,
+    lng:126.4160, lat:37.4730, desc:'다양한 레스토랑과 카페. 탑승 전 여유 식사 가능.' },
+  { id:'f3', type:'food', name:'스타벅스 인천공항점', icon:'☕', stars:'',
+    price:'₩5,000~8,000', dist:'T1 3층', shuttle:false,
+    lng:126.4520, lat:37.4492, desc:'T1 내 복수 매장 운영. 24시간 일부 영업.' },
+
+  // ─ 라운지 ─
+  { id:'l1', type:'lounge', name:'대한항공 KAL 라운지', icon:'💺', stars:'',
+    price:'비즈니스 이상', dist:'T2 면세구역', shuttle:false,
+    lng:126.4155, lat:37.4725, desc:'대한항공 비즈니스/퍼스트 클래스 전용. 뷔페·샤워 제공.' },
+  { id:'l2', type:'lounge', name:'아시아나 비즈니스 라운지', icon:'💺', stars:'',
+    price:'비즈니스 이상', dist:'T1 면세구역', shuttle:false,
+    lng:126.4512, lat:37.4491, desc:'아시아나 비즈니스 탑승객 이용. 스파·샤워 시설.' },
+  { id:'l3', type:'lounge', name:'스카이허브 라운지 (유료)', icon:'💺', stars:'',
+    price:'₩45,000/회', dist:'T1 3층', shuttle:false,
+    lng:126.4508, lat:37.4487, desc:'누구나 이용 가능한 유료 라운지. 뷔페·와이파이·샤워.' },
+];
+
+function initAirMap() {
+  if (airMap) {
+    airMap.resize();
+    updateMapDelayStrip();
+    return;
+  }
+
+  airMap = new maplibregl.Map({
+    container: 'maplibre-container',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    center: ICN,
+    zoom: 12.5,
+    attributionControl: false,
+  });
+
+  airMap.addControl(new maplibregl.NavigationControl(), 'top-left');
+  airMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+
+  // 공항 마커
+  const airportEl = document.createElement('div');
+  airportEl.innerHTML = '✈️';
+  airportEl.style.cssText = 'font-size:28px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))';
+  new maplibregl.Marker({ element: airportEl })
+    .setLngLat(ICN)
+    .setPopup(new maplibregl.Popup({ offset:25 }).setHTML(`
+      <div class="map-popup-title">✈️ 인천국제공항 (ICN)</div>
+      <div class="map-popup-meta">
+        T1: 제1여객터미널 · T2: 제2여객터미널<br>
+        위치: 인천광역시 중구 공항로 272<br>
+        공항철도(AREX): 서울역 43분<br>
+        연간 이용객: 약 7,100만 명
+      </div>`))
+    .addTo(airMap);
+
+  // T1/T2 마커
+  [['T1', ICN_T1, '#1565C0'], ['T2', ICN_T2, '#7C3AED']].forEach(([label, pos, color]) => {
+    const el = document.createElement('div');
+    el.textContent = label;
+    el.style.cssText = `background:${color};color:#fff;font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)`;
+    new maplibregl.Marker({ element: el }).setLngLat(pos).addTo(airMap);
+  });
+
+  airMap.on('load', () => {
+    renderMapMarkers();
+    updateMapDelayStrip();
+  });
+}
+
+function renderMapMarkers() {
+  // 기존 마커 제거
+  mapMarkers.forEach(m => m.remove());
+  mapMarkers.length = 0;
+
+  const colorMap = { hotel:'#F59E0B', transit:'#10B981', food:'#EF4444', lounge:'#7C3AED' };
+
+  MAP_POIS.forEach(poi => {
+    if (!mapLayers[poi.type]) return;
+
+    const el = document.createElement('div');
+    el.innerHTML = poi.icon;
+    el.style.cssText = `font-size:22px;cursor:pointer;transition:transform .2s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))`;
+    el.title = poi.name;
+    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.3)');
+    el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
+
+    const popup = new maplibregl.Popup({ offset: 28, maxWidth: '240px' })
+      .setHTML(`
+        <div class="map-popup-title">${poi.icon} ${poi.name}</div>
+        <div class="map-popup-meta">
+          ${poi.stars ? `<span style="color:#F59E0B">${poi.stars}</span><br>` : ''}
+          📍 ${poi.dist}<br>
+          ${poi.price ? `💰 ${poi.price}<br>` : ''}
+          ${poi.shuttle ? '🚌 공항 셔틀 운행<br>' : ''}
+          ${poi.desc}
+        </div>`);
+
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([poi.lng, poi.lat])
+      .setPopup(popup)
+      .addTo(airMap);
+
+    el.addEventListener('click', () => highlightSidebarCard(poi.id));
+    mapMarkers.push(marker);
+  });
+
+  renderSidebar();
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById('mapSidebar');
+  const visible = MAP_POIS.filter(p => mapLayers[p.type]);
+
+  if (!visible.length) {
+    sidebar.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:12px">필터를 선택하세요</div>';
+    return;
+  }
+
+  const typeOrder = ['hotel','transit','food','lounge'];
+  const typeLabel = {hotel:'🏨 호텔',transit:'🚌 교통',food:'🍽 식당·카페',lounge:'💺 라운지'};
+
+  let html2 = '';
+  typeOrder.forEach(type => {
+    if (!mapLayers[type]) return;
+    const items = visible.filter(p => p.type === type);
+    if (!items.length) return;
+    html2 += `<div style="padding:8px 14px 4px;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;background:var(--off)">${typeLabel[type]}</div>`;
+    items.forEach(poi => {
+      html2 += `<div class="hotel-card" id="sc-${poi.id}" onclick="flyToPoi('${poi.id}')">
+        <div class="hotel-icon">${poi.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="hotel-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${poi.name}</div>
+          <div class="hotel-dist">${poi.dist}</div>
+          ${poi.stars ? `<div class="hotel-stars">${poi.stars}</div>` : ''}
+          ${poi.price ? `<div class="hotel-price">${poi.price}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  });
+  sidebar.innerHTML = html2;
+}
+
+function flyToPoi(id) {
+  const poi = MAP_POIS.find(p => p.id === id);
+  if (!poi || !airMap) return;
+  airMap.flyTo({ center: [poi.lng, poi.lat], zoom: 14.5, duration: 800 });
+  // 팝업 열기
+  const idx = MAP_POIS.filter(p => mapLayers[p.type]).indexOf(poi);
+  if (mapMarkers[idx]) mapMarkers[idx].togglePopup();
+  highlightSidebarCard(id);
+}
+
+function highlightSidebarCard(id) {
+  document.querySelectorAll('.hotel-card').forEach(c => c.classList.remove('active'));
+  const card = document.getElementById('sc-' + id);
+  if (card) { card.classList.add('active'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+function toggleMapLayer(type, el) {
+  mapLayers[type] = !mapLayers[type];
+  el.classList.toggle('on', mapLayers[type]);
+  renderMapMarkers();
+}
+
+function flyToAirport() { if (airMap) airMap.flyTo({ center: ICN,    zoom: 12.5, duration: 800 }); }
+function flyToT1()      { if (airMap) airMap.flyTo({ center: ICN_T1, zoom: 15,   duration: 800 }); }
+function flyToT2()      { if (airMap) airMap.flyTo({ center: ICN_T2, zoom: 15,   duration: 800 }); }
+
+function updateMapDelayStrip() {
+  const total   = modalFlights.length || allFlights.length;
+  const delayed = (modalFlights.length ? modalFlights : allFlights).filter(f => (f.delayMin||0) >= 10 || (f.status||'').includes('지연')).length;
+  document.getElementById('mapTotalFlights').textContent = total ? total + '편' : '—';
+  document.getElementById('mapDelayCount').textContent   = total ? delayed + '편' : '—';
+  document.getElementById('mapNormalCount').textContent  = total ? (total - delayed) + '편' : '—';
+}
+
+// showPanel에 지도 초기화 훅
+const _origShowPanel = showPanel;
+showPanel = function(id, el) {
+  _origShowPanel(id, el);
+  if (id === 'airmap') {
+    setTimeout(() => initAirMap(), 100);
+  }
+};
 
 </script>
 </body>
