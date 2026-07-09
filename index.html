@@ -1705,7 +1705,10 @@ async function fetchArrivals(){
   if(btn){btn.innerHTML='<span class="spinner"></span> 로딩 중...';btn.disabled=true;}
   try {
     const url='/api/flights?type=arr&numOfRows=50';
-    const res=await fetch(url);
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch(url,{signal:ctrl.signal});
+    clearTimeout(t);
     const data=await res.json();
     if(data?.response?.body?.items){
       const raw=data.response.body.items;
@@ -2198,7 +2201,10 @@ async function loadModalFlights() {
   try {
     // ✅ 작동 확인된 입국장 API — 오늘 도착편 실시간 데이터 활용
     const url = '/api/flights?type=arr&numOfRows=50';
-    const res = await fetch(url);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
     const data = await res.json();
 
     if (data?.response?.body?.items) {
