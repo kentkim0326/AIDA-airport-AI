@@ -1079,7 +1079,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
         <b>인천국제공항공사 공공데이터 실시간 연동 (v3)</b><br>
         <span class="live-dot"></span>API 키 내장 — 버튼 클릭만으로 실시간 데이터 로드 | 출발·도착 탭 지원 | 1분 자동 갱신
       </div>
-      <button onclick="fetchLiveData('dep')" class="btn btn-green btn-sm" style="margin-left:auto;white-space:nowrap">
+      <button onclick="fetchLiveData('arr')" class="btn btn-green btn-sm" style="margin-left:auto;white-space:nowrap">
         🔄 실시간 데이터 불러오기
       </button>
     </div>
@@ -1418,7 +1418,7 @@ function showPanel(id, el) {
   document.getElementById('panel-'+id).classList.add('active');
   el.classList.add('active');
   if (id==='map') initMap();
-  if (id==='live') fetchLiveData('dep');
+  if (id==='live') fetchLiveData('arr');
   if (id==='arrivals') fetchArrivals();
 }
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
@@ -2531,14 +2531,7 @@ function updateMapDelayStrip() {
   document.getElementById('mapNormalCount').textContent  = total ? (total - delayed) + '편' : '—';
 }
 
-// showPanel에 지도 초기화 훅
-const _origShowPanel = showPanel;
-showPanel = function(id, el) {
-  _origShowPanel(id, el);
-  if (id === 'airmap') {
-    setTimeout(() => initAirMap(), 100);
-  }
-};
+// 지도 초기화는 drawerNav에서 직접 처리
 
 
 // ══════════════════════════════════════════════════════
@@ -2970,12 +2963,7 @@ function sendChat() {
   }, 1200);
 }
 
-// showPanel 훅에 채팅 초기화 추가
-const _origShowPanel2 = showPanel;
-showPanel = function(id, el) {
-  _origShowPanel2(id, el);
-  if (id === 'chat') initChat();
-};
+// 채팅 초기화는 drawerNav에서 직접 처리
 
 
 // ══════════════════════════════════════════════════════
@@ -3021,7 +3009,7 @@ function drawerNav(panelId, label, el) {
   if (panelId === 'map')      setTimeout(() => initMap(), 100);
   if (panelId === 'airmap')   setTimeout(() => initAirMap(), 100);
   if (panelId === 'chat')     initChat();
-  if (panelId === 'live')     fetchLiveData('dep');
+  if (panelId === 'live')     fetchLiveData('arr');
   if (panelId === 'arrivals') fetchArrivals();
 }
 
