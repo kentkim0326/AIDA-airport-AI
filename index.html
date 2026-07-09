@@ -281,8 +281,11 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 /* ── Flight Picker Modal ── */
 .modal-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000;
-  display:flex; align-items:center; justify-content:center;
-  animation:fadeIn .2s ease;
+  display:none; align-items:center; justify-content:center;
+}
+.modal-overlay.show {
+  display:flex;
+  animation:fadeIn .25s ease;
 }
 .modal-overlay.hide { animation:fadeOut .2s ease forwards; }
 .modal-overlay.hidden { display:none !important; }
@@ -949,7 +952,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 
   <!-- 항공편 픽커 버튼 -->
   <div style="padding:8px 16px 4px;">
-    <button onclick="loadModalFlights();closeDrawer();" style="width:100%;padding:10px;background:var(--cyan);color:#0A1628;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">
+    <button onclick="closeDrawer(); setTimeout(loadModalFlights, 300);" style="width:100%;padding:10px;background:var(--cyan);color:#0A1628;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">
       ✈ 오늘 항공편 보기
     </button>
   </div>
@@ -2185,7 +2188,10 @@ function pickFlight(flightId, dest, schedTime, delayMin, gate, terminal, status)
 function closeModal() {
   const m = document.getElementById('flightModal');
   m.classList.add('hide');
-  setTimeout(() => { m.classList.remove('show'); m.classList.add('hidden'); }, 220);
+  setTimeout(() => {
+    m.classList.remove('show', 'hide');
+    m.style.display = 'none';
+  }, 220);
 }
 
 
@@ -2216,8 +2222,9 @@ function airportName(code) {
 async function loadModalFlights() {
   // 모달 표시 (닫혔다 다시 열 때도 동작)
   const m = document.getElementById('flightModal');
-  m.classList.remove('hidden', 'hide');
   m.style.display = 'flex';
+  m.classList.remove('hidden', 'hide');
+  m.classList.add('show');
   const body = document.getElementById('modalBody');
   body.innerHTML = `<div class="modal-loading"><div class="big-spinner"></div>
     공공데이터 API에서 오늘의 도착편을 불러오는 중...<br>
