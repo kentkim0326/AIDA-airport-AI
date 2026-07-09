@@ -445,6 +445,28 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   #panel-map .grid2 { grid-template-columns: 1fr !important; }
   #bagMap { height: 260px !important; }
 
+  /* ── Chat panel mobile ── */
+  #panel-chat .chat-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  #panel-chat .chat-room-list {
+    max-height: 260px;
+    border-right: none !important;
+    border-bottom: 1px solid var(--light);
+  }
+  #panel-chat .chat-window {
+    min-height: 460px;
+  }
+  #panel-chat .chat-header { border-radius: 0; }
+  .chat-room-item { padding: 10px 12px; }
+  .cr-flag { font-size: 22px; }
+  .cr-name { font-size: 12px; }
+  .cr-preview { font-size: 10px; }
+  .chat-messages { padding: 10px 12px; gap: 8px; }
+  .msg-bubble { font-size: 12px; padding: 8px 11px; }
+  .chat-input { font-size: 12px; padding: 8px 12px; }
+
   /* ── Airport map panel ── */
   #panel-airmap > div > .card > div:last-child {
     grid-template-columns: 1fr !important;
@@ -1344,8 +1366,7 @@ async function fetchLiveData(type) {
   const btn=document.querySelector('#panel-live button');
   if(btn){btn.innerHTML='<span class="spinner"></span> 로딩 중...';btn.disabled=true;}
   try {
-    const url=`https://apis.data.go.kr/B551177/StatusOfPassengerFlightsOdp/getPassengerDeparturesDailyList?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&from_time=0000&to_time=2400&lang=K&type=json&airport=ICN&numOfRows=50`;
-    const res=await fetch(url);
+    const res=await fetch('/api/flights?type=dep&numOfRows=80');
     const data=await res.json();
     if(data?.response?.body?.items){
       const raw=data.response.body.items.item||[];
@@ -1367,7 +1388,7 @@ async function fetchLiveData(type) {
   updateLiveStats();
   renderFlightTable(allFlights);
   if(btn){btn.innerHTML='🔄 실시간 데이터 불러오기';btn.disabled=false;}
-  setTimeout(()=>fetchLiveData('dep'),60000);
+  // 자동갱신: 탭 활성 시에만 갱신 (CORS 에러 반복 방지)
 }
 
 function updateLiveStats(){
@@ -1448,7 +1469,7 @@ async function fetchArrivals(){
   const btn=document.querySelector('#panel-arrivals button');
   if(btn){btn.innerHTML='<span class="spinner"></span> 로딩 중...';btn.disabled=true;}
   try {
-    const url=`https://apis.data.go.kr/B551177/StatusOfArrivals/getArrivalsCongestion?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&numOfRows=50&pageNo=1&type=json`;
+    const url='/api/flights?type=arr&numOfRows=50';
     const res=await fetch(url);
     const data=await res.json();
     if(data?.response?.body?.items){
@@ -1919,7 +1940,7 @@ async function loadModalFlights() {
 
   try {
     // ✅ 작동 확인된 입국장 API — 오늘 도착편 실시간 데이터 활용
-    const url = `https://apis.data.go.kr/B551177/StatusOfArrivals/getArrivalsCongestion?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&numOfRows=50&pageNo=1&type=json`;
+    const url = '/api/flights?type=arr&numOfRows=50';
     const res = await fetch(url);
     const data = await res.json();
 
