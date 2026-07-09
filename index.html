@@ -1601,30 +1601,44 @@ async function fetchLiveData(type) {
   const btn=document.querySelector('#panel-live button');
   if(btn){btn.innerHTML='<span class="spinner"></span> 로딩 중...';btn.disabled=true;}
   try {
-    const res=await fetch('/api/flights?type=dep&numOfRows=80');
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch('/api/flights?type=arr&numOfRows=80',{signal:ctrl.signal});
+    clearTimeout(t);
     const data=await res.json();
     if(data?.response?.body?.items){
-      const raw=data.response.body.items.item||[];
+      const raw=data.response.body.items;
       const items=Array.isArray(raw)?raw:[raw];
-      allFlights=items.map(item=>({
-        flightId:item.flightId||'-',
-        airline:item.airlineKorean||item.airline||'-',
-        dest:item.airport||'-',
-        schedTime:(item.scheduleDateTime||'').slice(8,12).replace(/(\d{2})(\d{2})/,'$1:$2'),
-        chgTime:(item.estimatedDateTime||item.scheduleDateTime||'').slice(8,12).replace(/(\d{2})(\d{2})/,'$1:$2'),
-        gate:item.gate||'-',
-        status:item.remark||'정상',
-        terminal:item.terminalId==='P01'?'T1':'T2',
-      }));
+      allFlights=items.map(item=>{
+        const sched=(item.scheduletime||'');
+        const est=(item.estimatedtime||'');
+        const sm=parseInt(sched.slice(8,10)||0)*60+parseInt(sched.slice(10,12)||0);
+        const em=parseInt(est.slice(8,10)||0)*60+parseInt(est.slice(10,12)||0);
+        const delayMin=Math.max(0,em-sm);
+        return {
+          flightId: item.flightid||'-',
+          airline:  item.flightid?item.flightid.slice(0,2):'-',
+          dest:     airportName(item.airport||''),
+          destCode: item.airport||'-',
+          schedTime:sched.length>=12?sched.slice(8,10)+':'+sched.slice(10,12):'--:--',
+          chgTime:  est.length>=12?est.slice(8,10)+':'+est.slice(10,12):'--:--',
+          gate:     item.gatenumber||'-',
+          terminal: item.terno||'-',
+          status:   delayMin>=10?'지연 '+delayMin+'분':'정상',
+          delayMin: delayMin,
+        };
+      });
+      allFlights.sort((a,b)=>a.schedTime.localeCompare(b.schedTime));
     } else throw new Error('no data');
   } catch(e) {
+    console.warn('API 실패, 샘플 사용:', e.message);
     allFlights=SAMPLE_FLIGHTS;
   }
   updateLiveStats();
   renderFlightTable(allFlights);
   if(btn){btn.innerHTML='🔄 실시간 데이터 불러오기';btn.disabled=false;}
-  // 자동갱신: 탭 활성 시에만 갱신 (CORS 에러 반복 방지)
 }
+
 
 function updateLiveStats(){
   const total=allFlights.length;
