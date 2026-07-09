@@ -285,6 +285,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   animation:fadeIn .2s ease;
 }
 .modal-overlay.hide { animation:fadeOut .2s ease forwards; }
+.modal-overlay.hidden { display:none !important; }
 @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
 @keyframes fadeOut { from{opacity:1} to{opacity:0} }
 
@@ -945,6 +946,13 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   </div>
 
   <div class="drawer-divider"></div>
+
+  <!-- 항공편 픽커 버튼 -->
+  <div style="padding:8px 16px 4px;">
+    <button onclick="loadModalFlights();closeDrawer();" style="width:100%;padding:10px;background:var(--cyan);color:#0A1628;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">
+      ✈ 오늘 항공편 보기
+    </button>
+  </div>
 
   <!-- 하단 정보 -->
   <div class="drawer-footer">
@@ -2177,7 +2185,7 @@ function pickFlight(flightId, dest, schedTime, delayMin, gate, terminal, status)
 function closeModal() {
   const m = document.getElementById('flightModal');
   m.classList.add('hide');
-  setTimeout(() => m.style.display = 'none', 200);
+  setTimeout(() => { m.classList.remove('show'); m.classList.add('hidden'); }, 220);
 }
 
 
@@ -2206,6 +2214,10 @@ function airportName(code) {
 }
 
 async function loadModalFlights() {
+  // 모달 표시 (닫혔다 다시 열 때도 동작)
+  const m = document.getElementById('flightModal');
+  m.classList.remove('hidden', 'hide');
+  m.style.display = 'flex';
   const body = document.getElementById('modalBody');
   body.innerHTML = `<div class="modal-loading"><div class="big-spinner"></div>
     공공데이터 API에서 오늘의 도착편을 불러오는 중...<br>
