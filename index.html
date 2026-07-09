@@ -1846,32 +1846,55 @@ const UI_STRINGS = {
 };
 
 function setUILang(lang){
-  const s=UI_STRINGS[lang]||UI_STRINGS.ko;
-  // tabs
-  const tabs=document.querySelectorAll('.ntab, .ntab-dropdown-item');
-  s.tabs.forEach((t,i)=>{ if(tabs[i]) tabs[i].textContent=t; });
-  // logo sub
-  document.querySelector('.logo-sub').textContent=s.logoSub;
-  // sim button (if not disabled)
-  const simBtn=document.getElementById('simBtn');
-  if(simBtn&&!simBtn.disabled) simBtn.textContent=s.simBtn;
-  // live btn
-  const liveBtns=document.querySelectorAll('#panel-live button');
-  liveBtns.forEach(b=>{ if(b.textContent.includes('🔄')||b.textContent.includes('Load')||b.textContent.includes('불러')) b.textContent=s.liveBtn; });
-  // arrivals btn
-  const arrBtns=document.querySelectorAll('#panel-arrivals button');
-  arrBtns.forEach(b=>{ if(b.textContent.includes('🔄')||b.textContent.includes('혼잡')||b.textContent.includes('Cong')) b.textContent=s.arrBtn; });
-  // status filter options
-  const statusFilter=document.getElementById('liveStatusFilter');
-  if(statusFilter){ statusFilter.options[0].text=s.statusAll; statusFilter.options[1].text=s.delayOnly; statusFilter.options[2].text=s.normalOnly; }
-  // airline filter
-  const airlineFilter=document.getElementById('liveAirlineFilter');
-  if(airlineFilter) airlineFilter.options[0].text=s.allAirline;
-  // html lang
-  document.documentElement.lang=lang;
-  localStorage.setItem('aida-lang',lang);
-}
+  const s = UI_STRINGS[lang] || UI_STRINGS.ko;
 
+  // ── 네비 탭 텍스트 업데이트 (ntab 4개 + dropdown 3개 = 7개) ──
+  const NAV_LABELS = [
+    { sel:'[data-panel="sim"]',      text: s.tabs[0] },
+    { sel:'[data-panel="live"]',     text: s.tabs[1] },
+    { sel:'[data-panel="arrivals"]', text: s.tabs[2] },
+    { sel:'[data-panel="ai"]',       text: s.tabs[4] },
+    { sel:'[data-panel="map"]',      text: s.tabs[3] },
+    { sel:'[data-panel="airmap"]',   text: s.tabs[5] },
+    { sel:'[data-panel="chat"]',     text: s.tabs[6] },
+  ];
+  NAV_LABELS.forEach(({sel, text}) => {
+    const el = document.querySelector(sel);
+    if (!el || !text) return;
+    // ntab은 아이콘 span 보존, dropdown-item은 di-icon span 보존
+    const iconEl = el.querySelector('.ntab-icon, .di-icon');
+    if (iconEl) {
+      const iconHtml = iconEl.outerHTML;
+      el.innerHTML = iconHtml + ' ' + text;
+    } else {
+      el.textContent = text;
+    }
+  });
+
+  // ── 버튼들 ──
+  const simBtn = document.getElementById('simBtn');
+  if (simBtn && !simBtn.disabled) simBtn.textContent = s.simBtn;
+
+  document.querySelectorAll('#panel-live button').forEach(b => {
+    if (/🔄|Load|불러/.test(b.textContent)) b.textContent = s.liveBtn;
+  });
+  document.querySelectorAll('#panel-arrivals button').forEach(b => {
+    if (/🔄|혼잡|Cong/.test(b.textContent)) b.textContent = s.arrBtn;
+  });
+
+  // ── 필터 옵션 ──
+  const sf = document.getElementById('liveStatusFilter');
+  if (sf && sf.options.length >= 3) {
+    sf.options[0].text = s.statusAll;
+    sf.options[1].text = s.delayOnly;
+    sf.options[2].text = s.normalOnly;
+  }
+  const af = document.getElementById('liveAirlineFilter');
+  if (af && af.options.length >= 1) af.options[0].text = s.allAirline;
+
+  document.documentElement.lang = lang;
+  localStorage.setItem('aida-lang', lang);
+}
 (function(){
   const saved=localStorage.getItem('aida-lang')||'ko';
   const sel=document.getElementById('uiLang');
