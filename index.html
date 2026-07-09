@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AIDA v3 — AI Delay Assistant</title>
 <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -353,6 +353,155 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 .dis-item { text-align:center; }
 .dis-val  { font-size:20px; font-weight:800; }
 .dis-lbl  { font-size:10px; color:#90CAF9; margin-top:2px; }
+
+
+/* ══════════════════════════════════════
+   MOBILE RESPONSIVE — AIDA v3.5
+   ══════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Header ── */
+  .header {
+    padding: 10px 14px;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  .logo { font-size: 20px; }
+  .logo-sub { display: none; }         /* 서브타이틀 숨김 */
+  .ver { font-size: 9px; padding: 2px 6px; }
+  .live-badge { font-size: 9px; padding: 2px 7px; }
+
+  /* ── Nav controls ── */
+  .nav-controls { gap: 5px; }
+  .lang-select { font-size: 11px; padding: 4px 22px 4px 6px; }
+  .dark-toggle { width: 36px; height: 22px; }
+  .hbadge { font-size: 10px; padding: 4px 8px; white-space: nowrap; }
+
+  /* ── Tabs — horizontal scroll ── */
+  .main-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    top: 50px;
+  }
+  .main-tabs::-webkit-scrollbar { display: none; }
+  .mtab {
+    padding: 10px 13px;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Panels ── */
+  .panel { padding: 12px 10px; }
+
+  /* ── Grid → single column ── */
+  .grid2, .grid3, .grid4 {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .row2 { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* ── Cards ── */
+  .card { padding: 13px; border-radius: 12px; }
+
+  /* ── Steps (시뮬레이터) ── */
+  .steps { gap: 0; }
+  .step { font-size: 9px; padding: 7px 2px; }
+  .step-n { font-size: 12px; }
+
+  /* ── Info grid ── */
+  .igrid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ival  { font-size: 16px; }
+
+  /* ── Lang tabs ── */
+  .lang-tabs { gap: 4px; }
+  .ltab { padding: 4px 10px; font-size: 10px; }
+
+  /* ── Buttons ── */
+  .btn { font-size: 13px; padding: 11px; }
+  .btn-sm { font-size: 11px; padding: 6px 11px; }
+
+  /* ── Flight table ── */
+  #flightTable { font-size: 11px; }
+  #flightTable th, #flightTable td { padding: 7px 8px; }
+  /* 덜 중요한 컬럼 숨김 */
+  #flightTable th:nth-child(4),
+  #flightTable td:nth-child(4) { display: none; } /* 변경시간 */
+  #flightTable th:nth-child(5),
+  #flightTable td:nth-child(5) { display: none; } /* 터미널 */
+
+  /* ── Arrivals grid ── */
+  .arrivals-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px;
+  }
+  .arr-card { padding: 9px 10px; }
+  .arr-flight { font-size: 12px; }
+
+  /* ── Baggage map panel ── */
+  #panel-map .grid2 { grid-template-columns: 1fr !important; }
+  #bagMap { height: 260px !important; }
+
+  /* ── Airport map panel ── */
+  #panel-airmap > div > .card > div:last-child {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  #maplibre-container { height: 340px !important; border-radius: 0; }
+  .map-sidebar {
+    max-height: 240px;
+    border-left: none !important;
+    border-top: 1px solid var(--light);
+  }
+  .map-filter-bar { padding: 8px 10px; gap: 5px; }
+  .mfilt { font-size: 10px; padding: 4px 9px; }
+  .delay-info-strip { padding: 10px 12px; gap: 10px; }
+  .dis-val { font-size: 16px; }
+  .dis-lbl { font-size: 9px; }
+
+  /* ── Modal ── */
+  .modal-box {
+    width: 100vw;
+    max-height: 95vh;
+    border-radius: 16px 16px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+  .modal-overlay { align-items: flex-end; }
+  .modal-head { padding: 14px 16px; }
+  .modal-head .mlogo { font-size: 18px; }
+  .modal-head .msub { font-size: 10px; }
+  .modal-search { padding: 10px 12px; gap: 7px; }
+  .modal-search input { font-size: 12px; padding: 8px 11px; }
+  .modal-filter-row { padding: 8px 12px; gap: 5px; }
+  .mfbtn { font-size: 10px; padding: 4px 10px; }
+  .modal-body { padding: 8px 10px; }
+  .flight-card { padding: 10px 11px; gap: 8px; }
+  .fc-flightno { font-size: 13px; }
+  .fc-route { font-size: 10px; }
+  .fc-sched { font-size: 12px; }
+  .fc-badge { font-size: 9px; padding: 2px 7px; }
+  .modal-stats { padding: 8px 12px; font-size: 10px; }
+
+  /* ── AI panel ── */
+  #panel-ai > div { padding: 0; }
+
+  /* ── Delay strip ── */
+  .delay-info-strip > div:first-child { display: none; } /* 비행기 이모지 숨김 */
+}
+
+/* 아주 작은 화면 (< 380px) */
+@media (max-width: 380px) {
+  .hbadge { display: none; }
+  .row2 { grid-template-columns: 1fr; }
+  .arrivals-grid { grid-template-columns: 1fr !important; }
+}
 
 </style>
 </head>
