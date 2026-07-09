@@ -503,6 +503,129 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   .arrivals-grid { grid-template-columns: 1fr !important; }
 }
 
+
+/* ══ Traveler Chat ══ */
+.chat-grid { display:grid; grid-template-columns:280px 1fr; height:600px; gap:0; }
+@media(max-width:768px){ .chat-grid { grid-template-columns:1fr; height:auto; } }
+
+.chat-room-list { border-right:1px solid var(--light); overflow-y:auto; }
+.chat-room-item {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  cursor:pointer; border-bottom:1px solid var(--light); transition:background .15s;
+  position:relative;
+}
+.chat-room-item:hover { background:var(--off); }
+.chat-room-item.active { background:#EFF6FF; border-left:3px solid var(--blue); }
+[data-theme="dark"] .chat-room-item:hover  { background:#0F172A; }
+[data-theme="dark"] .chat-room-item.active { background:#1E3A5F; }
+.cr-flag   { font-size:26px; flex-shrink:0; }
+.cr-info   { flex:1; min-width:0; }
+.cr-name   { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cr-preview{ font-size:10px; color:var(--gray); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cr-meta   { text-align:right; flex-shrink:0; }
+.cr-time   { font-size:10px; color:var(--gray); }
+.cr-badge  { background:var(--red); color:#fff; font-size:9px; font-weight:700;
+             padding:2px 6px; border-radius:10px; margin-top:3px; display:inline-block; }
+
+/* Chat window */
+.chat-window { display:flex; flex-direction:column; }
+@media(max-width:768px){ .chat-window { min-height:480px; } }
+.chat-header {
+  padding:13px 16px; border-bottom:1px solid var(--light);
+  display:flex; align-items:center; gap:10px; flex-shrink:0;
+  background:var(--navy); color:#fff; border-radius:0 14px 0 0;
+}
+[data-theme="dark"] .chat-header { background:#020817; }
+.ch-flag { font-size:24px; }
+.ch-title{ font-size:14px; font-weight:700; }
+.ch-sub  { font-size:10px; color:#90CAF9; margin-top:1px; }
+.ch-online{ margin-left:auto; font-size:10px; color:#6EE7B7; }
+
+.chat-messages {
+  flex:1; overflow-y:auto; padding:14px 16px;
+  display:flex; flex-direction:column; gap:10px;
+  background:var(--off);
+}
+[data-theme="dark"] .chat-messages { background:#0A0F1E; }
+
+.chat-msg { display:flex; gap:8px; max-width:82%; }
+.chat-msg.me { flex-direction:row-reverse; align-self:flex-end; }
+.msg-avatar {
+  width:32px; height:32px; border-radius:50%; background:var(--blue);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0; overflow:hidden;
+}
+.msg-bubble {
+  background:#fff; border-radius:14px 14px 14px 4px;
+  padding:9px 13px; font-size:12px; line-height:1.6;
+  box-shadow:0 1px 4px rgba(0,0,0,.08); max-width:100%;
+}
+[data-theme="dark"] .msg-bubble { background:#1E293B; color:#E2E8F0; }
+.chat-msg.me .msg-bubble {
+  background:var(--blue); color:#fff;
+  border-radius:14px 14px 4px 14px;
+}
+.msg-name { font-size:10px; color:var(--gray); margin-bottom:3px; font-weight:600; }
+.chat-msg.me .msg-name { display:none; }
+.msg-time { font-size:9px; color:var(--gray); margin-top:4px; text-align:right; }
+.chat-msg.me .msg-time { color:rgba(255,255,255,.7); }
+
+/* System message */
+.sys-msg {
+  text-align:center; font-size:10px; color:var(--gray);
+  background:var(--light); border-radius:20px; padding:4px 14px;
+  align-self:center; margin:4px 0;
+}
+[data-theme="dark"] .sys-msg { background:#1E293B; }
+
+/* AIDA bot message */
+.aida-msg .msg-bubble {
+  background:linear-gradient(135deg,#0A1628,#1565C0); color:#fff;
+  border-radius:14px 14px 14px 4px;
+}
+.aida-label {
+  font-size:9px; font-weight:700; color:var(--cyan);
+  margin-bottom:3px; letter-spacing:.5px;
+}
+
+/* Input bar */
+.chat-input-bar {
+  padding:10px 14px; border-top:1px solid var(--light);
+  display:flex; gap:8px; align-items:center; flex-shrink:0;
+  background:#fff;
+}
+[data-theme="dark"] .chat-input-bar { background:#0F172A; border-top-color:#1E293B; }
+.chat-input {
+  flex:1; padding:9px 14px; border:1.5px solid var(--light);
+  border-radius:22px; font-size:13px; background:var(--off); outline:none;
+}
+.chat-input:focus { border-color:var(--blue); background:#fff; }
+[data-theme="dark"] .chat-input { background:#1E293B; color:#E2E8F0; }
+.chat-send {
+  width:38px; height:38px; background:var(--blue); color:#fff;
+  border:none; border-radius:50%; cursor:pointer; font-size:16px;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .15s; flex-shrink:0;
+}
+.chat-send:hover { background:var(--sky); }
+
+/* Room list header */
+.room-list-head {
+  padding:12px 14px; font-size:11px; font-weight:700; color:var(--gray);
+  text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--light);
+  background:var(--off); flex-shrink:0;
+}
+[data-theme="dark"] .room-list-head { background:#0F172A; }
+
+/* Typing indicator */
+.typing-dots span {
+  display:inline-block; width:6px; height:6px; border-radius:50%;
+  background:var(--gray); margin:0 2px; animation:typingDot 1.2s infinite;
+}
+.typing-dots span:nth-child(2){ animation-delay:.2s; }
+.typing-dots span:nth-child(3){ animation-delay:.4s; }
+@keyframes typingDot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
 </style>
 </head>
 <body>
@@ -581,6 +704,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   <div class="mtab" onclick="showPanel('map',this)">📦 수하물 실시간 맵</div>
   <div class="mtab" onclick="showPanel('ai',this)">🤖 AI 메시지 생성</div>
   <div class="mtab" onclick="showPanel('airmap',this)">🗺 공항 주변 지도</div>
+  <div class="mtab" onclick="showPanel('chat',this)">💬 여행자 채팅방</div>
 </div>
 
 <!-- ══════════════ PANEL 1: 시뮬레이터 ══════════════ -->
@@ -972,6 +1096,46 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
       </div>
     </div>
 
+  </div>
+</div>
+
+
+<!-- ══ PANEL 7: 여행자 채팅방 ══ -->
+<div class="panel" id="panel-chat">
+  <div style="max-width:1100px;margin:0 auto;">
+
+    <div style="background:linear-gradient(135deg,#0A1628,#7C3AED);color:#fff;border-radius:14px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <span style="font-size:26px">💬</span>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;margin-bottom:3px">인천공항 여행자 국가별 채팅방</div>
+        <div style="font-size:11px;color:#C4B5FD">같은 나라 여행자끼리 실시간 정보 공유 · 지연·환승·호텔·분실물 등 서로 도움</div>
+      </div>
+      <div style="font-size:11px;color:#A78BFA;text-align:right">
+        <div style="font-size:18px;font-weight:800" id="totalOnline">247</div>
+        <div>현재 접속중</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="chat-grid">
+
+        <!-- 채팅방 목록 -->
+        <div style="display:flex;flex-direction:column;overflow:hidden;">
+          <div class="room-list-head">🌏 채팅방 목록 (20)</div>
+          <div class="chat-room-list" id="chatRoomList"></div>
+        </div>
+
+        <!-- 채팅창 -->
+        <div class="chat-window" id="chatWindow">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--off);flex-direction:column;gap:12px;color:var(--gray);">
+            <div style="font-size:48px">💬</div>
+            <div style="font-size:14px;font-weight:700">채팅방을 선택하세요</div>
+            <div style="font-size:12px">왼쪽에서 나라별 채팅방을 선택하면<br>해당 언어로 대화를 볼 수 있습니다</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1511,7 +1675,7 @@ function toggleDark(){
 // ══════════════════════════════════════════════════════
 const UI_STRINGS = {
   ko: {
-    tabs:['✈ 지연 시뮬레이터','📡 실시간 운항현황','🛬 입국장 혼잡도','📦 수하물 실시간 맵','🤖 AI 메시지 생성','🗺 공항 주변 지도'],
+    tabs:['✈ 지연 시뮬레이터','📡 실시간 운항현황','🛬 입국장 혼잡도','📦 수하물 실시간 맵','🤖 AI 메시지 생성','🗺 공항 주변 지도','💬 여행자 채팅방'],
     simBtn:'AIDA 시뮬레이션 실행', simReset:'✓ 다시 실행',
     liveBtn:'🔄 실시간 데이터 불러오기', arrBtn:'🔄 혼잡도 불러오기',
     flightLabel:'항공편 번호', airlineLabel:'항공사', routeLabel:'노선',
@@ -1522,7 +1686,7 @@ const UI_STRINGS = {
     logoSub:'AI Delay Assistant — 공공데이터 실시간 연동 · Claude AI · 입국장 혼잡도',
   },
   en: {
-    tabs:['✈ Delay Simulator','📡 Live Flights','🛬 Arrivals Congestion','📦 Baggage Map','🤖 AI Message','🗺 Airport Map'],
+    tabs:['✈ Delay Simulator','📡 Live Flights','🛬 Arrivals Congestion','📦 Baggage Map','🤖 AI Message','🗺 Airport Map','💬 Traveler Chat'],
     simBtn:'Run AIDA Simulation', simReset:'✓ Run Again',
     liveBtn:'🔄 Load Live Data', arrBtn:'🔄 Load Congestion',
     flightLabel:'Flight No.', airlineLabel:'Airline', routeLabel:'Route',
@@ -1533,7 +1697,7 @@ const UI_STRINGS = {
     logoSub:'AI Delay Assistant — Live Open Data · Claude AI · Arrivals Congestion',
   },
   zh: {
-    tabs:['✈ 延误模拟器','📡 实时航班','🛬 入境大厅拥挤度','📦 行李实时地图','🤖 AI消息生成','🗺 机场周边地图'],
+    tabs:['✈ 延误模拟器','📡 实时航班','🛬 入境大厅拥挤度','📦 行李实时地图','🤖 AI消息生成','🗺 机场周边地图','💬 旅客聊天室'],
     simBtn:'运行AIDA模拟', simReset:'✓ 重新运行',
     liveBtn:'🔄 加载实时数据', arrBtn:'🔄 加载拥挤度',
     flightLabel:'航班号', airlineLabel:'航空公司', routeLabel:'航线',
@@ -1544,7 +1708,7 @@ const UI_STRINGS = {
     logoSub:'AI延误助手 — 实时公共数据 · Claude AI · 入境拥挤度',
   },
   ja: {
-    tabs:['✈ 遅延シミュレーター','📡 リアルタイム運航','🛬 入国混雑状況','📦 手荷物マップ','🤖 AIメッセージ','🗺 空港周辺マップ'],
+    tabs:['✈ 遅延シミュレーター','📡 リアルタイム運航','🛬 入国混雑状況','📦 手荷物マップ','🤖 AIメッセージ','🗺 空港周辺マップ','💬 旅行者チャット'],
     simBtn:'AIDAシミュレーション実行', simReset:'✓ 再実行',
     liveBtn:'🔄 リアルタイムデータ取得', arrBtn:'🔄 混雑状況取得',
     flightLabel:'便名', airlineLabel:'航空会社', routeLabel:'路線',
@@ -2076,6 +2240,443 @@ showPanel = function(id, el) {
   if (id === 'airmap') {
     setTimeout(() => initAirMap(), 100);
   }
+};
+
+
+// ══════════════════════════════════════════════════════
+// 여행자 채팅방
+// ══════════════════════════════════════════════════════
+const CHAT_ROOMS = [
+  {
+    id:'kr', flag:'🇰🇷', name:'한국 여행자 채팅방', lang:'Korean', online:58, unread:3,
+    preview:'환승 시간 2시간인데 면세점 갔다 올 수 있나요?',
+    topic:'환승·지연·면세·입국심사',
+    messages:[
+      {user:'김민준', avatar:'👨', time:'14:23', text:'안녕하세요! KE085편 지연됐는데 대기 어디서 해야 하나요?'},
+      {user:'이수진', avatar:'👩', time:'14:25', text:'저도 같은 편인데 T2 3층 라운지 앞에 안내 직원 있어요. 거기 가보세요!'},
+      {user:'박지호', avatar:'🧑', time:'14:26', text:'면세점은 지연돼도 이용 가능한가요? 게이트 닫히기 30분 전까지는 괜찮다고 들었는데'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:27', text:'✈️ KE085편 현재 90분 지연 확정입니다. 게이트 마감 30분 전 안내 방송 나오니 면세점 이용 가능합니다. 수하물은 보관소 B에 안전 보관 중입니다.'},
+      {user:'최예린', avatar:'👩', time:'14:30', text:'저는 뉴욕 환승인데 갈아타는 시간이 2시간밖에 없어서 너무 걱정돼요 ㅠㅠ'},
+      {user:'이수진', avatar:'👩', time:'14:31', text:'항공사 카운터 가서 환승 연결편 확인해달라고 하면 도와줘요!'},
+      {user:'김민준', avatar:'👨', time:'14:33', text:'감사합니다. 라운지 가봤는데 식사 쿠폰 받았어요 👍'},
+      {user:'박지호', avatar:'🧑', time:'14:35', text:'저도 10,000원 쿠폰 받았습니다. T2 3층 모든 식당에서 사용 가능하대요'},
+    ]
+  },
+  {
+    id:'us', flag:'🇺🇸', name:'American Travelers', lang:'English', online:34, unread:5,
+    preview:'My connecting flight to NYC is in 1.5 hours, is there enough time?',
+    topic:'Delays · Connections · Lost Baggage · Immigration',
+    messages:[
+      {user:'John M.', avatar:'👨', time:'13:45', text:"Hey everyone, UA893 just got delayed 45 min. Anyone else on this flight?"},
+      {user:'Sarah K.', avatar:'👩', time:'13:47', text:"Yes! I'm on UA893 too. The gate agent said it's a crew delay. So frustrating!"},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:48', text:"✈️ UA893 (ICN→SFO) is currently delayed 45 minutes. New departure: 15:45. Your baggage is secure at Terminal 1 Storage. Meal vouchers (₩10,000) available at Gate Area 31."},
+      {user:'Mike T.', avatar:'🧑', time:'13:50', text:"Does anyone know if the Incheon airport lounge is worth it? I have Priority Pass"},
+      {user:'Sarah K.', avatar:'👩', time:'13:52', text:"Yes! The Morning Calm lounge in T1 accepts Priority Pass. It's really nice - good food and showers available."},
+      {user:'John M.', avatar:'👨', time:'13:55', text:"Thanks! Heading there now. Also customs was super fast today - maybe 10 minutes total."},
+      {user:'Emily R.', avatar:'👩', time:'14:01', text:"Quick question - I left my phone charger at security. Is there a lost and found nearby?"},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:02', text:"📍 Lost & Found is located at T1 B1 Floor, near the security checkpoint exit. Open 24 hours. Tel: 032-741-2501"},
+      {user:'Mike T.', avatar:'🧑', time:'14:10', text:"Lounge is great - highly recommend if you have time to kill!"},
+    ]
+  },
+  {
+    id:'cn', flag:'🇨🇳', name:'中国旅客聊天室', lang:'Chinese', online:61, unread:8,
+    preview:'MU5041航班延误了3个多小时，怎么申请赔偿？',
+    topic:'延误赔偿·换乘·免税店·签证',
+    messages:[
+      {user:'王小明', avatar:'👨', time:'14:10', text:'大家好，MU5041延误了快3个小时了，有人知道怎么申请赔偿吗？'},
+      {user:'李美华', avatar:'👩', time:'14:12', text:'去东方航空柜台，在T1出发层，他们应该会给餐食补偿和延误证明的'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:13', text:'✈️ MU5041（ICN→PVG）目前延误192分钟。已为您准备：餐食券15,000韩元 + 贵宾室使用券（2小时）。请前往T1 D区125号登机口附近的东方航空服务台领取。'},
+      {user:'张伟', avatar:'🧑', time:'14:15', text:'免税店现在还能进吗？我已经过安检了'},
+      {user:'李美华', avatar:'👩', time:'14:16', text:'可以，登机前30分钟回来就行，时间够的'},
+      {user:'陈小红', avatar:'👩', time:'14:20', text:'请问换汇在哪里划算？机场里面的汇率好不好？'},
+      {user:'王小明', avatar:'👨', time:'14:22', text:'机场汇率一般，建议用银联卡直接取款或者用支付宝，汇率更好'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:25', text:'💱 换汇建议：T1 B1层有多家银行换汇点，韩亚银行和国民银行汇率相对较好。建议对比后再换。也可使用银联ATM取款，手续费较低。'},
+      {user:'张伟', avatar:'🧑', time:'14:28', text:'谢谢大家！这个聊天室太有用了👍'},
+    ]
+  },
+  {
+    id:'jp', flag:'🇯🇵', name:'日本人旅行者チャット', lang:'Japanese', online:29, unread:2,
+    preview:'仁川空港でのWi-Fiレンタルはどこですか？',
+    topic:'遅延・乗り継ぎ・Wi-Fi・両替',
+    messages:[
+      {user:'田中さん', avatar:'👨', time:'13:30', text:'こんにちは！7C1001便が遅延しているようですが、情報持っている方いますか？'},
+      {user:'鈴木さん', avatar:'👩', time:'13:32', text:'搭乗中になってるのでもうすぐ出発すると思います！ゲート43に急いで！'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:33', text:'✈️ 7C1001便（ICN→KIX）は現在搭乗中です。ゲート43（T1）。出発予定時刻09:10。お急ぎください！'},
+      {user:'佐藤さん', avatar:'🧑', time:'13:40', text:'Wi-Fiレンタルってどこでできますか？ポケットWiFi借りたくて'},
+      {user:'田中さん', avatar:'👨', time:'13:42', text:'T1の入国審査を出たらすぐ右手にいくつかレンタルショップありますよ'},
+      {user:'山田さん', avatar:'👩', time:'13:45', text:'KT、SKT、LGのカウンターが並んでます。料金は1日3,000〜4,000ウォンくらい'},
+      {user:'鈴木さん', avatar:'👩', time:'13:50', text:'T2はどうですか？T2到着予定なんですが'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:51', text:'📡 Wi-FiレンタルはT1・T2両方にあります。T2は到着ロビー出口付近。空港公式Wi-Fiは無料で「Airport_Public」に接続できます（制限あり）。'},
+      {user:'佐藤さん', avatar:'🧑', time:'14:00', text:'ありがとうございます！助かりました🙏'},
+    ]
+  },
+  {
+    id:'th', flag:'🇹🇭', name:'ห้องแชทนักเดินทางไทย', lang:'Thai', online:18, unread:1,
+    preview:'เที่ยวบิน TG652 ล่าช้า ใครอยู่ที่สนามบินบ้าง?',
+    topic:'เที่ยวบินล่าช้า · การต่อเครื่อง · วีซ่า',
+    messages:[
+      {user:'สมชาย', avatar:'👨', time:'14:20', text:'สวัสดีครับ! เที่ยวบิน TG652 ล่าช้า 14 นาที ใครอยู่บนเที่ยวบินนี้บ้าง?'},
+      {user:'นิภา', avatar:'👩', time:'14:22', text:'อยู่ค่ะ! กำลังรอที่ประตู 30 T1 ค่ะ'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:23', text:'✈️ TG652 (ICN→BKK) ล่าช้า 14 นาที ออกเดินทางใหม่เวลา 15:39 น. ประตูขึ้นเครื่อง 30 T1 ไม่มีการเปลี่ยนแปลง'},
+      {user:'วิชัย', avatar:'🧑', time:'14:25', text:'มีร้านอาหารไทยในสนามบินไหมครับ? หิวมากเลย'},
+      {user:'นิภา', avatar:'👩', time:'14:26', text:'มีร้านอาหารเกาหลีกับญี่ปุ่นเยอะค่ะ ไทยไม่มีนะคะ แต่ Tom Yum มีในฟู้ดคอร์ท T1'},
+      {user:'สมชาย', avatar:'👨', time:'14:30', text:'ขอบคุณทุกคนครับ แชทนี้มีประโยชน์มากเลย 👍'},
+    ]
+  },
+  {
+    id:'vn', flag:'🇻🇳', name:'Phòng chat du khách Việt Nam', lang:'Vietnamese', online:22, unread:4,
+    preview:'Ai biết cách lấy lại hành lý thất lạc không?',
+    topic:'Hành lý · Chậm chuyến · Quá cảnh',
+    messages:[
+      {user:'Minh Tuấn', avatar:'👨', time:'13:55', text:'Xin chào mọi người! Hành lý của mình bị thất lạc, phải làm gì bây giờ?'},
+      {user:'Thu Hà', avatar:'👩', time:'13:57', text:'Bạn cần đến quầy Claim Baggage ở T1 tầng 1, khu vực đến. Mang thẻ hành lý đi nhé'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:58', text:'📦 Hành lý thất lạc: Vui lòng đến Quầy Thất lạc hành lý (Lost & Found) tại T1 B1, gần cửa ra An ninh. Mang theo: thẻ hành lý, hộ chiếu, vé máy bay. Tel: 032-741-2501 (24/7)'},
+      {user:'Quốc Bảo', avatar:'🧑', time:'14:05', text:'Chuyến bay của mình chậm 2 tiếng. Có thể ra ngoài sân bay rồi vào lại không?'},
+      {user:'Thu Hà', avatar:'👩', time:'14:07', text:'Nếu bạn đã qua cửa an ninh rồi thì không nên ra ngoài vì phải làm thủ tục lại'},
+      {user:'Minh Tuấn', avatar:'👨', time:'14:15', text:'Cảm ơn mọi người! Đã tìm được hành lý rồi, nhân viên rất nhiệt tình 😊'},
+    ]
+  },
+  {
+    id:'sg', flag:'🇸🇬', name:'Singapore Travellers Chat', lang:'English (SG)', online:15, unread:0,
+    preview:'SQ600 delayed, anyone heading to Changi via Singapore?',
+    topic:'Transit · Shopping · Lounge Access',
+    messages:[
+      {user:'Wei Liang', avatar:'👨', time:'14:30', text:"Hey all, SQ600 to Singapore delayed 14 min. Not too bad lah!"},
+      {user:'Priya S.', avatar:'👩', time:'14:32', text:"Ya I saw. At least still can do some last minute shopping at duty free"},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:33', text:"✈️ SQ600 (ICN→SIN) delayed 14 min. New departure: 15:44. Gate 39, T1. Duty free shops accessible until 30 min before boarding."},
+      {user:'Marcus T.', avatar:'🧑', time:'14:35', text:"Anyone know if the Korean cosmetics here are cheaper than in Singapore?"},
+      {user:'Wei Liang', avatar:'👨', time:'14:37', text:"Much cheaper lah! Especially Innisfree and Sulwhasoo. Buy more, can use duty free limit"},
+      {user:'Priya S.', avatar:'👩', time:'14:40', text:"The bibimbap at T1 food court is also really good, worth trying if you haven't eaten!"},
+    ]
+  },
+  {
+    id:'ph', flag:'🇵🇭', name:'Filipino Travelers Lounge', lang:'Filipino/English', online:19, unread:6,
+    preview:'May nakaalam ba kung saan makakakuha ng SIM card dito?',
+    topic:'SIM Cards · OFW Assistance · Immigration',
+    messages:[
+      {user:'Maria G.', avatar:'👩', time:'13:40', text:'Good afternoon po! Saan po ba makakabili ng Korean SIM card dito sa airport?'},
+      {user:'Jose R.', avatar:'👨', time:'13:42', text:'Sa T1 arrival area po, may mga KT at SK Telecom booths. May tourist SIM na ₩30,000 for 7 days'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:43', text:'📱 SIM Cards available at T1 & T2 Arrival Halls. KT, SKT, LG U+ booths open 24hrs. Tourist SIM (7-day unlimited data) approx ₩33,000. Passport required.'},
+      {user:'Ana C.', avatar:'👩', time:'13:50', text:'May OFW lane po ba dito sa Incheon para sa immigration?'},
+      {user:'Maria G.', avatar:'👩', time:'13:52', text:'Wala pong dedicated OFW lane, pero may priority lane para sa elderly at families with kids'},
+      {user:'Jose R.', avatar:'👨', time:'13:55', text:"Immigration was fast for me - maybe 15 minutes lang. Pasok na lang sa regular lane"},
+      {user:'Ana C.', avatar:'👩', time:'14:00', text:'Salamat sa lahat! Napakatulong nitong chat 🙏'},
+    ]
+  },
+  {
+    id:'my', flag:'🇲🇾', name:'Pelancong Malaysia', lang:'Malay/English', online:12, unread:2,
+    preview:'Adakah ada solat di lapangan terbang Incheon?',
+    topic:'Kemudahan Muslim · Transit · Makanan Halal',
+    messages:[
+      {user:'Ahmad F.', avatar:'👨', time:'14:05', text:'Assalamualaikum semua. Ada tak surau atau bilik solat dekat Incheon ni?'},
+      {user:'Siti N.', avatar:'👩', time:'14:07', text:'Ada! Di T1 ada bilik solat di tingkat 3 dekat pintu 25. T2 pun ada'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:08', text:'🕌 Surau/Prayer Room: T1 Level 3 near Gate 25, and T1 Level 2 near Gate 10. T2 Level 3 near Gate 253. Compass direction provided inside.'},
+      {user:'Razif M.', avatar:'🧑', time:'14:12', text:'Makanan halal ada tak? Saya lapar ni'},
+      {user:'Siti N.', avatar:'👩', time:'14:14', text:'Ada beberapa restoran yang ada menu halal. Muslim-friendly café pun ada. Tapi lebih selamat beli yang ada logo halal'},
+      {user:'Ahmad F.', avatar:'👨', time:'14:20', text:'Terima kasih semua! Alhamdulillah ada kemudahan solat 🙏'},
+    ]
+  },
+  {
+    id:'in', flag:'🇮🇳', name:'Indian Travellers Chat', lang:'Hindi/English', online:24, unread:3,
+    preview:'Can someone help? My visa on arrival was rejected',
+    topic:'Visa · Veg Food · Currency Exchange',
+    messages:[
+      {user:'Raj P.', avatar:'👨', time:'13:20', text:'Hello everyone! First time in Korea. Any tips for immigration?'},
+      {user:'Priya M.', avatar:'👩', time:'13:22', text:'Make sure you have hotel booking proof and return ticket ready! They might ask. Was asked myself last year'},
+      {user:'Amit S.', avatar:'🧑', time:'13:25', text:'Also have some KRW cash ready. Not everywhere accepts cards especially outside airport'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:26', text:'🛂 Immigration Tips for Indian nationals: Have ready - hotel booking confirmation, return ticket, sufficient funds proof (min $1000 equivalent), and purpose of visit. K-ETA required for tourist visits. Average processing time: 20-30 mins.'},
+      {user:'Raj P.', avatar:'👨', time:'13:30', text:'Is there any vegetarian food options in the airport?'},
+      {user:'Priya M.', avatar:'👩', time:'13:32', text:'Yes! T1 food court has a few options. There is also a subway sandwich which has veggie options. Korean food mostly has meat but bibimbap can be made veg'},
+      {user:'Deepa K.', avatar:'👩', time:'13:40', text:'Anyone know currency exchange rate today? Need to change some dollars'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:41', text:'💱 Current rate approx: 1 USD = 1,370 KRW. Best exchange at KEB Hana Bank (T1 B1) or Woori Bank. Avoid street exchangers. ATMs also available 24/7 for international cards.'},
+    ]
+  },
+  {
+    id:'de', flag:'🇩🇪', name:'Deutsche Reisende', lang:'German', online:11, unread:1,
+    preview:'Gibt es einen Gepäck-Aufbewahrungsservice hier?',
+    topic:'Gepäck · Verspätungen · Lounge',
+    messages:[
+      {user:'Klaus W.', avatar:'👨', time:'13:10', text:'Hallo zusammen! Kennt jemand einen guten Gepäckaufbewahrungsservice hier am Flughafen?'},
+      {user:'Anna S.', avatar:'👩', time:'13:12', text:'Ja! Im T1 gibt es einen im Untergeschoss, kostet ca. 3000-5000 Won pro Stück je nach Größe'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:13', text:'🧳 Gepäckaufbewahrung: T1 B1 (24h, ₩3,000–8,000/Stück/Tag) und T2 B1. Außerdem gibt es beim Ausgang Gepäcktransportservice zu Hotels. Tel: 032-741-3110'},
+      {user:'Thomas B.', avatar:'🧑', time:'13:20', text:'Mein Flug nach Frankfurt wurde um 2 Stunden verschoben. Gibt es eine Lounge die ich ohne Business Ticket nutzen kann?'},
+      {user:'Anna S.', avatar:'👩', time:'13:22', text:'Ja! Die Sky Hub Lounge in T1 kostet 45.000 Won Eintritt. Essen, WLAN, Duschen inklusive'},
+      {user:'Klaus W.', avatar:'👨', time:'13:30', text:'Danke euch! Dieser Chat ist wirklich praktisch 👍'},
+    ]
+  },
+  {
+    id:'fr', flag:'🇫🇷', name:'Voyageurs Français', lang:'French', online:9, unread:0,
+    preview:'Le vol KE631 pour Paris a-t-il du retard?',
+    topic:'Retards · Douane · Gastronomie coréenne',
+    messages:[
+      {user:'Pierre D.', avatar:'👨', time:'13:00', text:'Bonjour! Mon vol KE631 pour Paris est-il toujours à l\'heure? Je ne vois pas d\'info sur les panneaux'},
+      {user:'Marie L.', avatar:'👩', time:'13:02', text:'Sur l\'appli Korean Air il indique "Gate Open" donc ça devrait partir à l\'heure!'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:03', text:'✈️ KE631 (ICN→CDG) - Statut actuel: Porte ouverte. Départ prévu: 10:45. Porte 131, T2. Embarquement dans environ 30 minutes.'},
+      {user:'Sophie M.', avatar:'👩', time:'13:10', text:'Quelqu\'un connaît un bon restaurant coréen authentique dans l\'aéroport avant de rentrer?'},
+      {user:'Pierre D.', avatar:'👨', time:'13:12', text:'J\'ai mangé au food court T2 ce matin - le dolsot bibimbap était excellent! 12,000 won'},
+      {user:'Marie L.', avatar:'👩', time:'13:15', text:'Merci pour l\'info! Je vais y aller. Bon voyage à tous ✈️🥂'},
+    ]
+  },
+  {
+    id:'au', flag:'🇦🇺', name:'Australian Travellers', lang:'English (AU)', online:14, unread:2,
+    preview:'Heading to Sydney - anyone know if the Qantas lounge is open here?',
+    topic:'Transit · Duty Free · Travel Tips',
+    messages:[
+      {user:'James O.', avatar:'👨', time:'14:00', text:"G\'day everyone! Anyone know if there's a Qantas lounge here at Incheon?"},
+      {user:'Emma W.', avatar:'👩', time:'14:02', text:"Qantas doesn't have their own but Qantas Platinum can use the Korean Air KAL lounge. Worth checking!"},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:03', text:"💺 Lounge access for Australian carriers: QF Platinum/Gold → KAL Lounge T2 (partner access). General: Sky Hub Lounge T1 ₩45,000 walk-in. Morning Calm Lounge (premium, T1 & T2)."},
+      {user:'Liam H.', avatar:'🧑', time:'14:08', text:"How's duty free for alcohol? Trying to bring some Korean soju home"},
+      {user:'Emma W.', avatar:'👩', time:'14:10', text:"Brilliant selection! Much cheaper than back home. Remember Australian customs allows 2.25L of alcohol duty-free though"},
+      {user:'James O.', avatar:'👨', time:'14:15', text:"Cheers mate! This chat is a ripper idea 🇦🇺"},
+    ]
+  },
+  {
+    id:'br', flag:'🇧🇷', name:'Viajantes Brasileiros', lang:'Portuguese', online:8, unread:1,
+    preview:'Alguém sabe se precisa de visto para entrar na Coreia?',
+    topic:'Visto · Câmbio · Dicas de Viagem',
+    messages:[
+      {user:'Carlos M.', avatar:'👨', time:'13:45', text:'Boa tarde! Brasileiros precisam de visto para entrar na Coreia do Sul?'},
+      {user:'Ana B.', avatar:'👩', time:'13:47', text:'Não precisa mais! Brasileiros têm isenção de visto por 90 dias. Mas precisa do K-ETA antes de embarcar'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:48', text:'🛂 Cidadãos brasileiros: Isenção de visto por até 90 dias (turismo/negócios). K-ETA obrigatório - solicite em keta.go.kr antes do voo. Documentos: passaporte válido, comprovante de hospedagem, passagem de volta.'},
+      {user:'Pedro S.', avatar:'🧑', time:'13:55', text:'Onde trocar dinheiro? O câmbio do aeroporto é bom?'},
+      {user:'Ana B.', avatar:'👩', time:'13:57', text:'O câmbio no aeroporto é razoável. Mas recomendo sacar no caixa eletrônico com cartão international, geralmente melhor taxa'},
+      {user:'Carlos M.', avatar:'👨', time:'14:05', text:'Muito obrigado a todos! Que grupo útil 🇧🇷👍'},
+    ]
+  },
+  {
+    id:'ru', flag:'🇷🇺', name:'Чат российских путешественников', lang:'Russian', online:7, unread:0,
+    preview:'Как добраться до Сеула из аэропорта быстро?',
+    topic:'Транспорт · Виза · Советы',
+    messages:[
+      {user:'Иван П.', avatar:'👨', time:'13:30', text:'Привет всем! Как лучше всего добраться до центра Сеула из аэропорта?'},
+      {user:'Наташа К.', avatar:'👩', time:'13:32', text:'AREX - экспресс прямо до Сеульского вокзала за 43 минуты. Удобно и недорого!'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:33', text:'🚄 Транспорт ICN→Сеул: AREX экспресс (43 мин, ₩9,500), обычный (56 мин, ₩4,150), автобус-лимузин (60-90 мин, ₩7,000-17,000), такси (60-80 мин, ₩65,000+). Станция T1 уровень B1.'},
+      {user:'Сергей В.', avatar:'🧑', time:'13:40', text:'Нужна ли виза в Корею для россиян сейчас?'},
+      {user:'Наташа К.', avatar:'👩', time:'13:42', text:'Сложная ситуация - лучше проверить на сайте посольства перед поездкой'},
+      {user:'Иван П.', avatar:'👨', time:'13:50', text:'Спасибо! Поехал на AREX, очень удобно 🚄'},
+    ]
+  },
+  {
+    id:'id', flag:'🇮🇩', name:'Chat Wisatawan Indonesia', lang:'Indonesian', online:16, unread:3,
+    preview:'Ada yang tahu di mana mushola di terminal 1?',
+    topic:'Fasilitas Muslim · Penerbangan · Tips',
+    messages:[
+      {user:'Budi S.', avatar:'👨', time:'14:10', text:'Assalamu\'alaikum! Ada yang tahu lokasi mushola di T1? Mau sholat Ashar dulu'},
+      {user:'Rina W.', avatar:'👩', time:'14:11', text:'Waalaikumsalam! Ada di lantai 3 T1 dekat gate 25. Cari tanda "Prayer Room" ya'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:12', text:'🕌 Mushola/Prayer Room: T1 Lantai 3 (dekat Gate 25) dan Lantai 2 (dekat Gate 10). T2 Lantai 3 (dekat Gate 253). Tersedia tempat wudhu dan petunjuk arah kiblat.'},
+      {user:'Dewi A.', avatar:'👩', time:'14:18', text:'Pesawat saya delay 1 jam. Ada rekomendasi makanan halal di sini?'},
+      {user:'Budi S.', avatar:'👨', time:'14:20', text:'Ada restoran Muslim-friendly di T1 food court lantai 3. Ada juga Subway yang vegetarian-friendly'},
+      {user:'Rina W.', avatar:'👩', time:'14:25', text:'Jangan lupa beli Maxim coffee mix dan snack Korea buat oleh-oleh! Murah dan enak 😄'},
+    ]
+  },
+  {
+    id:'ae', flag:'🇦🇪', name:'غرفة دردشة المسافرين العرب', lang:'Arabic', online:13, unread:4,
+    preview:'هل يوجد مطعم حلال في المطار؟',
+    topic:'طعام حلال · مرافق المسلمين · الترانزيت',
+    messages:[
+      {user:'محمد ع.', avatar:'👨', time:'13:50', text:'السلام عليكم! هل يوجد مطعم حلال في مطار إنشيون؟'},
+      {user:'فاطمة س.', avatar:'👩', time:'13:52', text:'وعليكم السلام! نعم يوجد بعض المطاعم التي تقدم طعاماً حلالاً في الطابق الثالث من T1'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:53', text:'🍽️ الطعام الحلال في مطار إنشيون: مطاعم صديقة للمسلمين في T1 الطابق 3. ابحث عن شعار "Muslim Friendly". غرف الصلاة: T1 الطابق 3 بالقرب من البوابة 25. اتجاه القبلة موضح داخل الغرفة.'},
+      {user:'أحمد م.', avatar:'🧑', time:'14:00', text:'هل يمكن الخروج من المطار أثناء الانتظار؟ رحلتي بعد 5 ساعات'},
+      {user:'فاطمة س.', avatar:'👩', time:'14:02', text:'نعم يمكنك ذلك إذا لم تكن قد أتممت إجراءات الأمن. لكن ستحتاج للمرور من الأمن مجدداً'},
+      {user:'محمد ع.', avatar:'👨', time:'14:10', text:'شكراً جزيلاً! هذه الغرفة مفيدة جداً 🙏'},
+    ]
+  },
+  {
+    id:'ca', flag:'🇨🇦', name:'Canadian Travellers Lounge', lang:'English/French (CA)', online:16, unread:2,
+    preview:'Anyone know if NEXUS card works for automated gates here?',
+    topic:'Immigration · Transit · Shopping',
+    messages:[
+      {user:'Sarah L.', avatar:'👩', time:'13:15', text:'Hello fellow Canadians! First time at Incheon - this airport is INCREDIBLE 😱'},
+      {user:'Mike J.', avatar:'👨', time:'13:17', text:'Right?! It\'s like a city inside. Way better than Pearson lol'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:18', text:'🛂 Canadian passport holders: No visa required for up to 90 days. K-ETA required before departure (keta.go.kr). Smart Entry gates available for eligible travellers - look for "Automated Immigration" signs at T1 & T2.'},
+      {user:'Anne T.', avatar:'👩', time:'13:25', text:'Anyone tried the Korean BBQ in the airport? Worth it before flying home?'},
+      {user:'Sarah L.', avatar:'👩', time:'13:27', text:'YES! There\'s a good one in T1 food court. But honestly the convenience store kimbap is amazing and only ₩3,000'},
+      {user:'Mike J.', avatar:'👨', time:'13:30', text:'Pro tip: buy Samyang fire noodles at the duty free, cheaper than back in Canada and huge variety!'},
+    ]
+  },
+  {
+    id:'mx', flag:'🇲🇽', name:'Viajeros Mexicanos', lang:'Spanish', online:6, unread:1,
+    preview:'¿Hay conexión a internet gratis en el aeropuerto?',
+    topic:'WiFi · Cambio de divisas · Transporte',
+    messages:[
+      {user:'Diego R.', avatar:'👨', time:'14:15', text:'¡Hola a todos! ¿Hay WiFi gratis en el aeropuerto de Incheon?'},
+      {user:'Valeria G.', avatar:'👩', time:'14:17', text:'¡Sí! Busca la red "Airport_Public" - es gratuita y bastante rápida. Sin necesidad de registro'},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'14:18', text:'📶 WiFi gratuito disponible en toda la Terminal T1 y T2. Red: "Airport_Public" (sin contraseña, límite de velocidad). Para velocidad completa: renta de pocket WiFi disponible desde ₩3,000/día en ambas terminales.'},
+      {user:'Carlos M.', avatar:'🧑', time:'14:22', text:'¿Cómo llego al centro de Seúl? ¿El metro o taxi?'},
+      {user:'Diego R.', avatar:'👨', time:'14:24', text:'El tren AREX es lo mejor - directo a Seúl en 43 minutos. El taxi sale carísimo'},
+      {user:'Valeria G.', avatar:'👩', time:'14:30', text:'¡Gracias a todos! Este chat es muy útil 🌮🇰🇷'},
+    ]
+  },
+  {
+    id:'gb', flag:'🇬🇧', name:'UK Travellers Chat', lang:'English (UK)', online:20, unread:5,
+    preview:'Anyone know if Boots or a similar pharmacy is in the airport?',
+    topic:'Shopping · Connections · Transit Tips',
+    messages:[
+      {user:'Oliver H.', avatar:'👨', time:'13:00', text:"Morning all! Stuck at Incheon for 6 hours. Any recommendations on how to spend the time?"},
+      {user:'Charlotte B.', avatar:'👩', time:'13:02', text:"Loads to do here! There's a spa, Korean cultural experience centre, a golf simulator (!) and brilliant duty free"},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:03', text:"🏖️ Incheon Airport transit activities: Korean Cultural Street (T1 L4), Spa on Air (₩18,000, T1 Airside), Golf Range simulator (T1 L4), Cinema, Kids Zone. All accessible without going through immigration!"},
+      {user:'James F.', avatar:'🧑', time:'13:10', text:"Is the Spa on Air worth it? Been on a 14 hour flight from London"},
+      {user:'Charlotte B.', avatar:'👩', time:'13:12', text:"Absolutely brilliant! Shower, sauna, rest area. Best decision after a long haul. Bring a towel though"},
+      {user:'Oliver H.', avatar:'👨', time:'13:20', text:"Right, off to the spa then. Cheers all! ☕🛁"},
+      {user:'Emma P.', avatar:'👩', time:'13:25', text:"Anyone seen a pharmacy? Need some paracetamol"},
+      {user:'AIDA', avatar:'🤖', aida:true, time:'13:26', text:"💊 Pharmacies at Incheon: T1 Landside L1 (before security, 24hr), T1 Airside L3 (after security). Korean paracetamol is 타이레놀 (Tylenol) - widely available. Convenience stores (GS25, CU) also stock basic medicines."},
+    ]
+  },
+];
+
+let currentRoomId = null;
+
+function initChat() {
+  const list = document.getElementById('chatRoomList');
+  list.innerHTML = CHAT_ROOMS.map(r => `
+    <div class="chat-room-item" id="cr-${r.id}" onclick="openChatRoom('${r.id}')">
+      <div class="cr-flag">${r.flag}</div>
+      <div class="cr-info">
+        <div class="cr-name">${r.name}</div>
+        <div class="cr-preview">${r.preview}</div>
+      </div>
+      <div class="cr-meta">
+        <div class="cr-time">${r.online}명</div>
+        ${r.unread > 0 ? `<div class="cr-badge">${r.unread}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function openChatRoom(id) {
+  currentRoomId = id;
+  const room = CHAT_ROOMS.find(r => r.id === id);
+  if (!room) return;
+
+  // 활성 표시
+  document.querySelectorAll('.chat-room-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('cr-' + id).classList.add('active');
+  // 뱃지 제거
+  const badge = document.querySelector(`#cr-${id} .cr-badge`);
+  if (badge) badge.remove();
+
+  const win = document.getElementById('chatWindow');
+  win.innerHTML = `
+    <div class="chat-header">
+      <div class="ch-flag">${room.flag}</div>
+      <div>
+        <div class="ch-title">${room.name}</div>
+        <div class="ch-sub">주제: ${room.topic}</div>
+      </div>
+      <div class="ch-online">🟢 ${room.online}명 접속중</div>
+    </div>
+    <div class="chat-messages" id="chatMsgs">
+      <div class="sys-msg">오늘 인천공항 채팅방에 오신 것을 환영합니다 ✈️</div>
+      ${room.messages.map(m => renderMsg(m)).join('')}
+      <div class="sys-msg" id="typingIndicator" style="display:none">
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+      </div>
+    </div>
+    <div class="chat-input-bar">
+      <div style="font-size:18px">${room.flag}</div>
+      <input class="chat-input" id="chatInput" placeholder="메시지 입력... (${room.lang})" onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>`;
+
+  // 스크롤 아래로
+  setTimeout(() => {
+    const msgs = document.getElementById('chatMsgs');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }, 50);
+}
+
+function renderMsg(m) {
+  if (m.aida) {
+    return `<div class="chat-msg aida-msg">
+      <div class="msg-avatar" style="background:linear-gradient(135deg,#0A1628,#1565C0)">🤖</div>
+      <div>
+        <div class="msg-name aida-label">AIDA AI</div>
+        <div class="msg-bubble">${m.text}</div>
+        <div class="msg-time">${m.time}</div>
+      </div>
+    </div>`;
+  }
+  return `<div class="chat-msg">
+    <div class="msg-avatar">${m.avatar}</div>
+    <div>
+      <div class="msg-name">${m.user}</div>
+      <div class="msg-bubble">${m.text}</div>
+      <div class="msg-time">${m.time}</div>
+    </div>
+  </div>`;
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msgs  = document.getElementById('chatMsgs');
+  const text  = (input.value || '').trim();
+  if (!text || !msgs) return;
+  input.value = '';
+
+  const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+  const myMsg = {user:'나', avatar:'😊', time:now, text};
+  const div = document.createElement('div');
+  div.className = 'chat-msg me';
+  div.innerHTML = `
+    <div class="msg-avatar" style="background:var(--green)">😊</div>
+    <div>
+      <div class="msg-bubble">${text}</div>
+      <div class="msg-time">${now}</div>
+    </div>`;
+  // typing 앞에 삽입
+  const typing = document.getElementById('typingIndicator');
+  msgs.insertBefore(div, typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // AIDA 자동 응답 (키워드 기반)
+  const lower = text.toLowerCase();
+  let reply = '';
+  if (lower.includes('delay') || lower.includes('지연') || lower.includes('遅延') || lower.includes('延误')) {
+    reply = '✈️ AIDA: 현재 지연 정보를 확인했습니다. 정확한 편명을 알려주시면 실시간 상태를 안내드릴게요!';
+  } else if (lower.includes('baggage') || lower.includes('수하물') || lower.includes('行李') || lower.includes('hành lý')) {
+    reply = '📦 AIDA: 수하물 문의는 T1/T2 수하물 클레임 구역 또는 032-741-2501로 연락하세요. 24시간 운영합니다.';
+  } else if (lower.includes('lounge') || lower.includes('라운지')) {
+    reply = '💺 AIDA: 스카이허브 라운지 (T1, ₩45,000), 모닝캄 라운지 (프리미엄), KAL 라운지 (T2, 비즈니스 이상) 이용 가능합니다.';
+  } else if (lower.includes('wifi') || lower.includes('인터넷') || lower.includes('internet')) {
+    reply = '📶 AIDA: 무료 WiFi "Airport_Public" 전 터미널 이용 가능. 포켓WiFi 렌탈은 ₩3,000~/일.';
+  } else if (lower.includes('hotel') || lower.includes('호텔')) {
+    reply = '🏨 AIDA: 파라다이스시티 (공항 5분), 그랜드하얏트 인천 (셔틀 10분), 네스트호텔 (셔틀 15분). 지도 탭에서 확인하세요!';
+  } else if (lower.includes('taxi') || lower.includes('bus') || lower.includes('arex') || lower.includes('교통')) {
+    reply = '🚌 AIDA: AREX 서울역 43분 (₩9,500), 공항버스 60-90분 (₩7,000~), 택시 ₩65,000~';
+  } else {
+    // 랜덤 응답
+    const replies = [
+      '💬 도움이 필요하신가요? 지연, 수하물, 교통, 호텔 등 무엇이든 물어보세요!',
+      '✈️ 인천공항 이용에 불편한 점이 있으시면 안내데스크 T1/T2 1층에 문의하세요.',
+      '🙋 다른 여행자들도 답변해줄 거예요! 조금만 기다려주세요.',
+    ];
+    reply = replies[Math.floor(Math.random() * replies.length)];
+  }
+
+  // 타이핑 표시
+  typing.style.display = 'block';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    typing.style.display = 'none';
+    const aidaDiv = document.createElement('div');
+    aidaDiv.className = 'chat-msg aida-msg';
+    aidaDiv.innerHTML = `
+      <div class="msg-avatar" style="background:linear-gradient(135deg,#0A1628,#1565C0)">🤖</div>
+      <div>
+        <div class="msg-name aida-label">AIDA AI</div>
+        <div class="msg-bubble">${reply}</div>
+        <div class="msg-time">${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
+    msgs.insertBefore(aidaDiv, typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+}
+
+// showPanel 훅에 채팅 초기화 추가
+const _origShowPanel2 = showPanel;
+showPanel = function(id, el) {
+  _origShowPanel2(id, el);
+  if (id === 'chat') initChat();
 };
 
 </script>
