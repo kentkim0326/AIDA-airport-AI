@@ -72,24 +72,94 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
      background:var(--off);color:var(--navy);min-height:100vh;}
-.header{background:var(--navy);padding:14px 24px;display:flex;align-items:center;
-        gap:14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.3);}
-.logo{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;}
+.header{
+  background:var(--navy);padding:0 20px;display:flex;align-items:center;
+  gap:0;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.3);
+  height:54px;
+}
+.logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px;flex-shrink:0;}
 .logo span{color:var(--cyan);}
-.logo-sub{font-size:11px;color:#7090B0;margin-top:1px;}
-.hbadge{margin-left:auto;background:var(--blue);color:#fff;font-size:11px;
-        padding:5px 12px;border-radius:20px;white-space:nowrap;}
-.ver{background:#1D3A5A;color:var(--cyan);font-size:10px;padding:3px 8px;
-     border-radius:10px;margin-left:8px;}
-.live-badge{background:var(--green);color:#fff;font-size:10px;padding:3px 10px;
-            border-radius:10px;margin-left:8px;animation:pulse 2s infinite;}
-.main-tabs{display:flex;gap:0;background:#fff;border-bottom:2px solid var(--light);
-           position:sticky;top:56px;z-index:100;}
-.mtab{padding:13px 22px;font-size:13px;font-weight:600;color:var(--gray);
-      cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;
-      transition:all .2s;white-space:nowrap;}
-.mtab.active{color:var(--blue);border-bottom-color:var(--blue);}
-.mtab:hover{color:var(--blue);}
+.logo-sub{font-size:10px;color:#7090B0;margin-top:1px;}
+.ver{background:#1D3A5A;color:var(--cyan);font-size:9px;padding:2px 6px;
+     border-radius:8px;margin-left:6px;}
+.live-badge{background:var(--green);color:#fff;font-size:9px;padding:2px 7px;
+            border-radius:8px;margin-left:5px;animation:pulse 2s infinite;}
+.hbadge{background:var(--blue);color:#fff;font-size:10px;
+        padding:4px 10px;border-radius:16px;white-space:nowrap;flex-shrink:0;}
+
+/* ── 네비 탭 (헤더 안에 인라인) ── */
+.nav-tabs{
+  display:flex;align-items:stretch;margin-left:18px;height:54px;gap:0;flex:1;
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.ntab{
+  display:flex;align-items:center;gap:5px;padding:0 14px;
+  font-size:12px;font-weight:600;color:rgba(255,255,255,.6);
+  cursor:pointer;border-bottom:3px solid transparent;
+  white-space:nowrap;transition:all .18s;flex-shrink:0;
+  position:relative;
+}
+.ntab:hover{color:#fff;background:rgba(255,255,255,.07);}
+.ntab.active{color:#fff;border-bottom-color:var(--cyan);}
+.ntab .ntab-icon{font-size:14px;}
+
+/* ── More 드롭다운 ── */
+.ntab-more{position:relative;}
+.ntab-more-btn{
+  display:flex;align-items:center;gap:5px;padding:0 14px;height:54px;
+  font-size:12px;font-weight:600;color:rgba(255,255,255,.6);
+  cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;
+  border-bottom:3px solid transparent;background:none;border-top:none;
+  border-left:none;border-right:none;
+}
+.ntab-more-btn:hover,.ntab-more-btn.open{color:#fff;background:rgba(255,255,255,.07);}
+.ntab-more-btn.has-active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.ntab-dropdown{
+  position:absolute;top:54px;right:0;min-width:190px;
+  background:#0D2137;border:1px solid rgba(255,255,255,.12);
+  border-radius:0 0 12px 12px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  display:none;z-index:300;overflow:hidden;
+}
+.ntab-more-btn.open + .ntab-dropdown{display:block;}
+.ntab-dropdown-item{
+  display:flex;align-items:center;gap:10px;padding:11px 16px;
+  font-size:12px;font-weight:600;color:rgba(255,255,255,.7);
+  cursor:pointer;transition:background .15s;
+}
+.ntab-dropdown-item:hover{background:rgba(255,255,255,.1);color:#fff;}
+.ntab-dropdown-item.active{color:var(--cyan);background:rgba(0,180,216,.1);}
+.ntab-dropdown-item .di-icon{font-size:16px;width:24px;text-align:center;}
+[data-theme="dark"] .ntab-dropdown{background:#020817;border-color:rgba(255,255,255,.1);}
+
+/* ── 우측 컨트롤 ── */
+.nav-controls{display:flex;align-items:center;gap:7px;margin-left:10px;flex-shrink:0;}
+.lang-select{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  color:#fff;font-size:11px;padding:4px 22px 4px 7px;border-radius:8px;
+  cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23ffffff88'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 6px center;
+}
+.lang-select:hover{background-color:rgba(255,255,255,.18);}
+.lang-select option{background:#0A1628;color:#fff;}
+.dark-toggle{
+  width:38px;height:22px;border-radius:11px;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);cursor:pointer;position:relative;
+  transition:background .3s;flex-shrink:0;
+}
+.dark-toggle::after{
+  content:'☀️';position:absolute;left:2px;top:50%;transform:translateY(-50%);
+  font-size:12px;transition:left .3s;line-height:1;
+}
+[data-theme="dark"] .dark-toggle{background:rgba(99,102,241,.4);border-color:rgba(99,102,241,.6);}
+[data-theme="dark"] .dark-toggle::after{content:'🌙';left:18px;}
+
+/* main-tabs 제거 (헤더로 통합) */
+.main-tabs{display:none;}
+
+/* 패널 top 조정 */
+.panel{padding-top:16px;}
 .panel{display:none;padding:20px 16px;max-width:1200px;margin:0 auto;}
 .panel.active{display:block;}
 .grid2{display:grid;grid-template-columns:340px 1fr;gap:18px;}
@@ -377,22 +447,20 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
   .dark-toggle { width: 36px; height: 22px; }
   .hbadge { font-size: 10px; padding: 4px 8px; white-space: nowrap; }
 
-  /* ── Tabs — horizontal scroll ── */
-  .main-tabs {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-wrap: nowrap;
-    top: 50px;
-  }
-  .main-tabs::-webkit-scrollbar { display: none; }
-  .mtab {
-    padding: 10px 13px;
-    font-size: 11px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+  /* ── Nav tabs mobile ── */
+  .header { padding: 0 10px; height: 50px; gap: 0; }
+  .logo { font-size: 18px; }
+  .ver, .live-badge { display: none; }
+  .nav-tabs { margin-left: 8px; }
+  .ntab { padding: 0 10px; font-size: 11px; }
+  .ntab-icon { display: none; }
+  .ntab-more-btn { padding: 0 10px; font-size: 11px; }
+  .lang-select { font-size: 10px; padding: 3px 18px 3px 6px; }
+  .dark-toggle { width: 32px; height: 20px; }
+  .dark-toggle::after { font-size: 11px; }
+  [data-theme="dark"] .dark-toggle::after { left: 14px; }
+  .hbadge { display: none; }
+  .ntab-dropdown { right: 0; min-width: 170px; }
 
   /* ── Panels ── */
   .panel { padding: 12px 10px; }
@@ -703,10 +771,46 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
 </div>
 
 <div class="header">
-  <div>
-    <div class="logo">AI<span>DA</span> <span class="ver">v3</span> <span class="live-badge">🔴 LIVE</span></div>
-    <div class="logo-sub">AI Delay Assistant — 공공데이터 실시간 연동 · Claude AI · 입국장 혼잡도</div>
+  <!-- 로고 -->
+  <div style="flex-shrink:0">
+    <div class="logo">AI<span>DA</span> <span class="ver">v3</span> <span class="live-badge">● LIVE</span></div>
   </div>
+
+  <!-- 인라인 탭 (메인 4개) -->
+  <nav class="nav-tabs" id="navTabs">
+    <div class="ntab active" data-panel="sim"      onclick="showPanelNav('sim',this)">
+      <span class="ntab-icon">✈</span> 지연 시뮬레이터
+    </div>
+    <div class="ntab" data-panel="live"     onclick="showPanelNav('live',this)">
+      <span class="ntab-icon">📡</span> 운항현황
+    </div>
+    <div class="ntab" data-panel="arrivals" onclick="showPanelNav('arrivals',this)">
+      <span class="ntab-icon">🛬</span> 입국장
+    </div>
+    <div class="ntab" data-panel="ai"       onclick="showPanelNav('ai',this)">
+      <span class="ntab-icon">🤖</span> AI 메시지
+    </div>
+
+    <!-- More 드롭다운 -->
+    <div class="ntab-more">
+      <button class="ntab-more-btn" id="moreBtn" onclick="toggleMore(event)">
+        ⋯ 더보기 <span style="font-size:9px;opacity:.7">▾</span>
+      </button>
+      <div class="ntab-dropdown" id="moreDropdown">
+        <div class="ntab-dropdown-item" data-panel="map"    onclick="showPanelNav('map',this)">
+          <span class="di-icon">📦</span> 수하물 실시간 맵
+        </div>
+        <div class="ntab-dropdown-item" data-panel="airmap" onclick="showPanelNav('airmap',this)">
+          <span class="di-icon">🗺</span> 공항 주변 지도
+        </div>
+        <div class="ntab-dropdown-item" data-panel="chat"   onclick="showPanelNav('chat',this)">
+          <span class="di-icon">💬</span> 여행자 채팅방
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 우측 컨트롤 -->
   <div class="nav-controls">
     <select class="lang-select" id="uiLang" onchange="setUILang(this.value)" title="UI 언어">
       <option value="ko">🇰🇷 한국어</option>
@@ -715,7 +819,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
       <option value="ja">🇯🇵 日本語</option>
     </select>
     <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="다크/라이트 모드"></button>
-    <div class="hbadge" style="margin-left:0">🏆 인천공항 AI-PORT 최우수상</div>
+    <div class="hbadge">🏆 최우수상</div>
   </div>
 </div>
 
@@ -1744,7 +1848,7 @@ const UI_STRINGS = {
 function setUILang(lang){
   const s=UI_STRINGS[lang]||UI_STRINGS.ko;
   // tabs
-  const tabs=document.querySelectorAll('.mtab');
+  const tabs=document.querySelectorAll('.ntab, .ntab-dropdown-item');
   s.tabs.forEach((t,i)=>{ if(tabs[i]) tabs[i].textContent=t; });
   // logo sub
   document.querySelector('.logo-sub').textContent=s.logoSub;
@@ -2699,6 +2803,50 @@ showPanel = function(id, el) {
   _origShowPanel2(id, el);
   if (id === 'chat') initChat();
 };
+
+
+// ══ 네비바 탭 제어 ══
+function showPanelNav(id, el) {
+  // 모든 ntab / dropdown-item 비활성화
+  document.querySelectorAll('.ntab, .ntab-dropdown-item').forEach(t => {
+    t.classList.remove('active');
+  });
+  // more 버튼 has-active 제거
+  document.getElementById('moreBtn').classList.remove('has-active');
+
+  // 클릭된 항목 활성화
+  el.classList.add('active');
+
+  // dropdown 항목이면 more 버튼에 has-active 표시
+  if (el.classList.contains('ntab-dropdown-item')) {
+    document.getElementById('moreBtn').classList.add('has-active');
+    // dropdown 닫기
+    document.getElementById('moreBtn').classList.remove('open');
+  }
+
+  // 패널 전환 (기존 showPanel 재사용)
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+
+  // 패널별 초기화
+  if (id === 'map')    initMap();
+  if (id === 'airmap') setTimeout(() => initAirMap(), 100);
+  if (id === 'chat')   initChat();
+  if (id === 'live')   fetchLiveData('dep');
+  if (id === 'arrivals') fetchArrivals();
+}
+
+function toggleMore(e) {
+  e.stopPropagation();
+  document.getElementById('moreBtn').classList.toggle('open');
+}
+
+// 외부 클릭 시 드롭다운 닫기
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ntab-more')) {
+    document.getElementById('moreBtn').classList.remove('open');
+  }
+});
 
 </script>
 </body>
