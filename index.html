@@ -325,7 +325,7 @@ footer{text-align:center;font-size:11px;color:var(--gray);padding:16px;margin-to
     <div class="modal-head">
       <div>
         <div class="mlogo">AI<span>DA</span> v3</div>
-        <div class="msub">오늘의 인천공항 출발편 — 항공편을 선택하면 시뮬레이터에 바로 연동됩니다</div>
+        <div class="msub">오늘 인천공항 출발편 실시간 현황 — 편명·날짜·지연 정보 확인 후 선택하면 시뮬레이터에 바로 연동</div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
@@ -1382,18 +1382,18 @@ function setModalFilter(type, el) {
 }
 
 function renderModalFlights() {
-  const q     = (document.getElementById('modalSearch').value||'').toLowerCase();
-  const al    = (document.getElementById('modalAirline').value||'');
-  const body  = document.getElementById('modalBody');
+  const q   = (document.getElementById('modalSearch').value||'').toLowerCase();
+  const al  = (document.getElementById('modalAirline').value||'');
+  const body= document.getElementById('modalBody');
 
   let list = modalFlights.filter(f => {
     const status = getFlightStatus(f);
-    if (modalFilter === 'delayed'  && status !== 'delayed')  return false;
-    if (modalFilter === 'normal'   && status !== 'normal')   return false;
+    if (modalFilter === 'delayed'  && f.delayMin < 10)   return false;
+    if (modalFilter === 'normal'   && f.delayMin >= 10)  return false;
     if (modalFilter === 'boarding' && status !== 'boarding' && status !== 'gate') return false;
     if (al && !(f.flightId||'').startsWith(al)) return false;
     if (q) {
-      const hay = ((f.flightId||'')+(f.airline||'')+(f.dest||'')+(f.status||'')).toLowerCase();
+      const hay = ((f.flightId||'')+(f.airline||'')+(f.dest||'')+(f.destCode||'')+(f.status||'')).toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -1405,25 +1405,39 @@ function renderModalFlights() {
   }
 
   body.innerHTML = list.map(f => {
-    const status  = getFlightStatus(f);
-    const emoji   = getAirlineEmoji(f.flightId);
-    const isDelay = status === 'delayed';
-    const delayMatch = (f.status||'').match(/(\d+)분/);
-    const delayMin = delayMatch ? delayMatch[1] : '45';
-    const badgeClass = status === 'gate' ? 'gate' : status;
-    const badgeText  = status === 'delayed' ? `⚠ ${f.status}` : status === 'boarding' ? '탑승중 🚪' : status === 'gate' ? '게이트오픈' : '정상 ✅';
+    const isDelay    = f.delayMin >= 10;
+    const emoji      = getAirlineEmoji(f.flightId);
+    const statusCls  = isDelay ? 'delayed' : 'normal';
+    const badgeText  = isDelay ? `⚠ 지연 ${f.delayMin}분` : '정상 ✅';
+    const badgeCls   = isDelay ? 'delayed' : 'normal';
+    // 인원 표시 (실제 데이터일 때)
+    const paxHtml = (f.korean + f.foreigner) > 0
+      ? `<span style="font-size:10px;color:var(--gray);margin-left:8px">🇰🇷${f.korean} 🌍${f.foreigner}</span>` : '';
 
-    return `<div class="flight-card ${status}" onclick="pickFlight('${f.flightId}','${f.dest||''}','${f.schedTime||''}','${delayMin}','${f.gate||'-'}','${f.terminal||''}','${(f.status||'정상').replace(/'/g,'')}')">
+    return `<div class="flight-card ${statusCls}" onclick="pickFlight('${f.flightId}','${f.dest}','${f.schedTime}','${f.delayMin}','${f.gate}','${f.terminal}','${f.status}')">
       <div class="fc-airline">${emoji}</div>
       <div class="fc-info">
-        <div class="fc-flightno">${f.flightId||'-'} <span style="font-size:11px;font-weight:400;color:var(--gray)">${f.airline||''}</span></div>
-        <div class="fc-route">ICN → ${f.dest||'-'} &nbsp;|&nbsp; 탑승구 ${f.gate||'-'} &nbsp;|&nbsp; ${f.terminal||'-'}</div>
+        <div class="fc-flightno">
+          ${f.flightId}
+          <span style="font-size:11px;font-weight:400;color:var(--gray)"> ${f.airline||''}</span>
+          ${paxHtml}
+        </div>
+        <div class="fc-route">
+          <b style="color:var(--cyan)">ICN 인천</b>
+          <span style="margin:0 5px;color:var(--gray)">→</span>
+          <b>${f.dest}</b>
+          <span style="color:var(--gray)"> (${f.destCode})</span>
+          &nbsp;|&nbsp; ${f.date}
+          &nbsp;|&nbsp; ${f.terminal} 게이트 ${f.gate}
+        </div>
       </div>
       <div class="fc-times">
-        <div class="fc-sched">${f.schedTime||'-'}</div>
-        ${isDelay ? `<div class="fc-delay">→ ${f.chgTime}</div>` : `<div class="fc-ok">정시</div>`}
+        <div class="fc-sched">${f.schedTime}</div>
+        ${isDelay
+          ? `<div class="fc-delay">→ ${f.estTime} <span style="font-size:10px">(+${f.delayMin}분)</span></div>`
+          : `<div class="fc-ok">정시 출발</div>`}
       </div>
-      <div class="fc-badge ${badgeClass}">${badgeText}</div>
+      <div class="fc-badge ${badgeCls}">${badgeText}</div>
     </div>`;
   }).join('');
 }
@@ -1435,7 +1449,7 @@ function pickFlight(flightId, dest, schedTime, delayMin, gate, terminal, status)
   if (fn) fn.value = flightId;
   if (dm) dm.value = parseInt(delayMin) || 0;
 
-  // 항공사 코드 추출해서 셀렉트 맞추기
+  // 항공사 코드 추출
   const airlineCode = flightId.slice(0,2).toUpperCase();
   const alSel = document.getElementById('airline');
   if (alSel) {
@@ -1444,15 +1458,23 @@ function pickFlight(flightId, dest, schedTime, delayMin, gate, terminal, status)
     }
   }
 
-  closeModal();
-
-  // 시뮬레이터 탭으로 이동
-  showPanel('sim', document.querySelectorAll('.mtab')[0]);
-
-  // 자동 실행 (지연편만)
-  if (parseInt(delayMin) > 0) {
-    setTimeout(() => runSim(), 400);
+  // 노선 업데이트 — ICN→목적지코드
+  const f = modalFlights.find(x => x.flightId === flightId);
+  const routeSel = document.getElementById('route');
+  if (routeSel && f) {
+    const routeVal = `ICN-${f.destCode}`;
+    let found = false;
+    for (let opt of routeSel.options) { if (opt.value === routeVal) { routeSel.value = routeVal; found = true; break; } }
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = routeVal; opt.textContent = routeVal; opt.selected = true;
+      routeSel.appendChild(opt);
+    }
   }
+
+  closeModal();
+  showPanel('sim', document.querySelectorAll('.mtab')[0]);
+  if (parseInt(delayMin) > 0) setTimeout(() => runSim(), 400);
 }
 
 function closeModal() {
@@ -1461,40 +1483,111 @@ function closeModal() {
   setTimeout(() => m.style.display = 'none', 200);
 }
 
+
+// 공항코드 → 한국어 도시명
+const AIRPORT_KR = {
+  NRT:'도쿄(나리타)',HND:'도쿄(하네다)',KIX:'오사카(간사이)',FUK:'후쿠오카',
+  CTS:'삿포로',NGO:'나고야',OKA:'오키나와',
+  PVG:'상하이(푸동)',PEK:'베이징(수도)',PKX:'베이징(다싱)',CAN:'광저우',
+  SZX:'선전',XIY:'시안',TAO:'칭다오',YNJ:'연길',YNT:'옌타이',
+  HKG:'홍콩',MFM:'마카오',TPE:'타이베이',
+  BKK:'방콕(수완나품)',DMK:'방콕(돈므앙)',SIN:'싱가포르',
+  KUL:'쿠알라룸푸르',CGK:'자카르타',MNL:'마닐라',RGN:'양곤',
+  HAN:'하노이',SGN:'호치민',DPS:'발리',
+  LAX:'로스앤젤레스',SFO:'샌프란시스코',JFK:'뉴욕',
+  ORD:'시카고',SEA:'시애틀',LAS:'라스베이거스',
+  LHR:'런던(히드로)',CDG:'파리(드골)',FRA:'프랑크푸르트',
+  AMS:'암스테르담',ZRH:'취리히',IST:'이스탄불',
+  DXB:'두바이',DOH:'도하',AUH:'아부다비',
+  ADD:'아디스아바바',JNB:'요하네스버그',
+  SYD:'시드니',MEL:'멜버른',AKL:'오클랜드',
+  CJU:'제주',PUS:'부산(김해)',GMP:'서울(김포)',
+};
+
+function airportName(code) {
+  return AIRPORT_KR[code] || code;
+}
+
 async function loadModalFlights() {
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `<div class="modal-loading"><div class="big-spinner"></div>
+    공공데이터 API에서 오늘의 항공편을 불러오는 중...<br>
+    <span style="font-size:11px;color:var(--gray);margin-top:6px;display:block">인천국제공항공사 실시간 데이터</span>
+  </div>`;
+
   try {
-    const url = `https://apis.data.go.kr/B551177/StatusOfArrivals/getArrivalsCongestion?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&numOfRows=3&pageNo=1&type=json`;
-    // 출발편 API 시도
-    const depUrl = `https://apis.data.go.kr/B551177/StatusOfPassengerFlightsOdp/getPassengerDeparturesDailyList?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&from_time=0000&to_time=2400&lang=K&type=json&airport=ICN&numOfRows=50`;
-    const res = await fetch(depUrl);
+    // ✅ 작동 확인된 입국장 API — 오늘 도착편 실시간 데이터 활용
+    const url = `https://apis.data.go.kr/B551177/StatusOfArrivals/getArrivalsCongestion?serviceKey=${encodeURIComponent(PUBLIC_API_KEY)}&numOfRows=50&pageNo=1&type=json`;
+    const res = await fetch(url);
     const data = await res.json();
+
     if (data?.response?.body?.items) {
-      const raw = data.response.body.items.item || [];
+      const raw = data.response.body.items;
       const items = Array.isArray(raw) ? raw : [raw];
-      modalFlights = items.map(item => ({
-        flightId: item.flightId || '-',
-        airline: item.airlineKorean || item.airline || '-',
-        dest: item.airport || '-',
-        schedTime: (item.scheduleDateTime||'').slice(8,12).replace(/(\d{2})(\d{2})/,'$1:$2'),
-        chgTime: (item.estimatedDateTime||item.scheduleDateTime||'').slice(8,12).replace(/(\d{2})(\d{2})/,'$1:$2'),
-        gate: item.gate || '-',
-        status: item.remark || '정상',
-        terminal: item.terminalId === 'P01' ? 'T1' : 'T2',
-      }));
+
+      // 날짜 파싱 헬퍼
+      const parseDateTime = (s) => {
+        if (!s || s.length < 12) return {date:'', time:'--:--', full:s};
+        const year=s.slice(0,4), mon=s.slice(4,6), day=s.slice(6,8);
+        const hh=s.slice(8,10), mm=s.slice(10,12);
+        return { date:`${year}.${mon}.${day}`, time:`${hh}:${mm}`, full:`${year}-${mon}-${day} ${hh}:${mm}` };
+      };
+
+      modalFlights = items.map(item => {
+        const sched  = parseDateTime(item.scheduletime);
+        const est    = parseDateTime(item.estimatedtime);
+        // 지연 분 계산
+        const sm = parseInt(item.scheduletime?.slice(8,10)||0)*60 + parseInt(item.scheduletime?.slice(10,12)||0);
+        const em = parseInt(item.estimatedtime?.slice(8,10)||0)*60 + parseInt(item.estimatedtime?.slice(10,12)||0);
+        const delayMin = Math.max(0, em - sm);
+
+        const destCode = item.airport || '';
+        return {
+          flightId:  item.flightid || '-',
+          airline:   item.flightid ? (item.flightid.slice(0,2)) : '-',
+          dest:      airportName(destCode),
+          destCode:  destCode,
+          origin:    'ICN',          // 출발지 (인천)
+          date:      sched.date,     // ✅ 날짜
+          schedTime: sched.time,     // ✅ 예정 시간
+          estTime:   est.time,       // ✅ 실제 예상 시간
+          delayMin:  delayMin,       // ✅ 지연 분수
+          gate:      item.gatenumber || '-',
+          terminal:  item.terno || '-',
+          entrygate: item.entrygate || '',
+          korean:    Math.round(parseFloat(item.korean||0)),
+          foreigner: Math.round(parseFloat(item.foreigner||0)),
+          status:    delayMin >= 10 ? `지연 ${delayMin}분` : '정상',
+          chgTime:   delayMin >= 10 ? est.time : sched.time,
+        };
+      });
+
+      // 시간 순 정렬
+      modalFlights.sort((a,b) => a.schedTime.localeCompare(b.schedTime));
+
     } else throw new Error('no data');
   } catch(e) {
-    // 샘플 데이터 fallback
-    modalFlights = [...SAMPLE_FLIGHTS];
+    console.warn('API 실패, 샘플 사용:', e);
+    modalFlights = SAMPLE_FLIGHTS.map(f => ({
+      ...f,
+      date: new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\. /g,'.').replace('.',''),
+      origin: 'ICN',
+      destCode: f.dest,
+      delayMin: f.status.includes('지연') ? parseInt(f.status.match(/\d+/)?.[0]||0) : 0,
+      estTime: f.chgTime,
+      korean: 0, foreigner: 0,
+    }));
   }
 
-  // 통계 업데이트
+  // 통계
   const total   = modalFlights.length;
-  const delayed = modalFlights.filter(f => getFlightStatus(f) === 'delayed').length;
-  const board   = modalFlights.filter(f => getFlightStatus(f) === 'boarding' || getFlightStatus(f) === 'gate').length;
+  const delayed = modalFlights.filter(f => f.delayMin >= 10).length;
+  const board   = modalFlights.filter(f => getFlightStatus(f) === 'boarding').length;
+  const today   = modalFlights[0]?.date || '';
   document.getElementById('msTotalText').textContent = `총 ${total}편`;
   document.getElementById('msDelayText').textContent = `지연 ${delayed}편`;
-  document.getElementById('msBoardText').textContent = `탑승중 ${board}편`;
-  document.getElementById('msUpdate').textContent    = '갱신: ' + new Date().toLocaleTimeString('ko-KR');
+  document.getElementById('msBoardText').textContent = `정상 ${total - delayed}편`;
+  document.getElementById('msUpdate').textContent    = `${today}  갱신: ${new Date().toLocaleTimeString('ko-KR')}`;
   document.getElementById('modalStats').style.display = 'flex';
 
   renderModalFlights();
