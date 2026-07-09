@@ -2025,12 +2025,12 @@ function setUILang(lang){
   document.documentElement.lang = lang;
   localStorage.setItem('aida-lang', lang);
 }
-(function(){
-  const saved=localStorage.getItem('aida-lang')||'ko';
-  const sel=document.getElementById('uiLang');
-  if(sel) sel.value=saved;
+document.addEventListener('DOMContentLoaded', function() {
+  const saved = localStorage.getItem('aida-lang') || 'ko';
+  const sel = document.getElementById('uiLang');
+  if (sel) sel.value = saved;
   setUILang(saved);
-})();
+});
 
 
 // ══════════════════════════════════════════════════════
